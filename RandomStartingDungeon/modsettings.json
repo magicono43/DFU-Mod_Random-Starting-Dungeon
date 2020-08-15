@@ -1,0 +1,246 @@
+{
+    "Version": "1.0",
+    "Sections": [
+        {
+            "Name": "Quest&IslandOptions",
+            "Description": "Settings For Quest Dungeons And Islands",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": false,
+                    "Name": "questDungeons",
+                    "Description": "Allows Quest Dungeons To Be Spawned In || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "isolatedIslandDungeons",
+                    "Description": "Allows Dungeons To Be Spawned In Located On Uninhabited Islands || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "populatedIslandDungeons",
+                    "Description": "Allows Dungeons To Be Spawned In Located On Inhabited Islands || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        },
+        {
+            "Name": "ClimateOptions",
+            "Description": "Settings For Allowed Dungeon Location Climate Types To Spawn In",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": true,
+                    "Name": "ocean",
+                    "Description": "Allows Being Spawned In Dungeons Located In Ocean Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "desert",
+                    "Description": "Allows Being Spawned In Dungeons Located In Desert Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "hotDesert",
+                    "Description": "Allows Being Spawned In Dungeons Located In Hot Desert Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "mountain",
+                    "Description": "Allows Being Spawned In Dungeons Located In Mountain Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "rainforest",
+                    "Description": "Allows Being Spawned In Dungeons Located In Rainforest Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "swamp",
+                    "Description": "Allows Being Spawned In Dungeons Located In Swamp Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "mountainWoods",
+                    "Description": "Allows Being Spawned In Dungeons Located In Mountain Woods Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "woodlands",
+                    "Description": "Allows Being Spawned In Dungeons Located In Woodlands Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "hauntedWoodlands",
+                    "Description": "Allows Being Spawned In Dungeons Located In Haunted Woodlands Climate || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        },
+        {
+            "Name": "DungeonTypeOptions",
+            "Description": "Settings For Allowed Dungeon Types To Spawn In",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": false,
+                    "Name": "cemetery",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Cemetery || Default = False",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "scorpionNest",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Scorpion Nest || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "volcanicCaves",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Volcanic Caves || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "barbarianStronghold",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Barbarian Stronghold || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "dragonsDen",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Dragons Den || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "giantStronghold",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Giant Stronghold || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "spiderNest",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Spider Nest || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "ruinedCastle",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Ruined Castle || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "harpyNest",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Harpy Nest || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "laboratory",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Laboratory || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "vampireHaunt",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Vampire Haunt || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "coven",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Coven || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "naturalCave",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Natural Cave || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "mine",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Mine || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "desecratedTemple",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Desecrated Temple || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "prison",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Prison || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "humanStronghold",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Human Stronghold || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "orcStronghold",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Orc Stronghold || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "crypt",
+                    "Description": "Allows Being Spawned In Dungeons Of Type Crypt || Default = True",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        }
+    ]
+}
