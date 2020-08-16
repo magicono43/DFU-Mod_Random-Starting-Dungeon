@@ -127,6 +127,11 @@ namespace RandomStartingDungeon
             mod.IsReady = true;
         }
 		
+		private void Start()
+        {
+            RandomStartingDungeonConsoleCommands.RegisterCommands();
+        }
+		
 		#region InitMod and Settings
 		
 		private static void InitMod(bool questDungeons, bool isolatedIslandDungeons, bool populatedIslandDungeons,
@@ -533,58 +538,71 @@ namespace RandomStartingDungeon
 
             if (!alreadyRolled)
             {
-                int randomRegionIndex = RandomRegionRoller(validRegionIndexes.ToArray());
-                foundIndices = regionValidDungGrabBag[randomRegionIndex];
+                if (validRegionIndexes.Count > 0)
+                {
+                    int randomRegionIndex = RandomRegionRoller(validRegionIndexes.ToArray());
+                    foundIndices = regionValidDungGrabBag[randomRegionIndex];
 
-                // Select a random dungeon location index from available list then get its location data
-                int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
-                DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
+                    // Select a random dungeon location index from available list then get its location data
+                    int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
+                    DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
 
-                // Spawn inside dungeon at this world position
-                DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
-                DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
-                GameManager.Instance.PlayerEnterExit.RespawnPlayer(
-                    worldPos.X,
-                    worldPos.Y,
-                    true,
-                    true);
+                    // Spawn inside dungeon at this world position
+                    DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
+                    DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
+                    GameManager.Instance.PlayerEnterExit.RespawnPlayer(
+                        worldPos.X,
+                        worldPos.Y,
+                        true,
+                        true);
 
-                regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
-                Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
-                Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+                    regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
+                    Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
+                    Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+                }
+                else
+                {
+                    Debug.Log("No Valid Dungeon Locations To Teleport To, Try Making Your Settings Less Strict.");
+                }
             }
             else
             {
-                int randomRegionIndex = RandomRegionRoller(quickRerollValidRegions.ToArray());
-                foundIndices = quickRerollDictionary[randomRegionIndex];
+                if (quickRerollValidRegions.Count > 0)
+                {
+                    int randomRegionIndex = RandomRegionRoller(quickRerollValidRegions.ToArray());
+                    foundIndices = quickRerollDictionary[randomRegionIndex];
 
-                // Select a random dungeon location index from available list then get its location data
-                int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
-                DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
+                    // Select a random dungeon location index from available list then get its location data
+                    int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
+                    DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
 
-                // Spawn inside dungeon at this world position
-                DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
-                DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
-                GameManager.Instance.PlayerEnterExit.RespawnPlayer(
-                    worldPos.X,
-                    worldPos.Y,
-                    true,
-                    true);
+                    // Spawn inside dungeon at this world position
+                    DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
+                    DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
+                    GameManager.Instance.PlayerEnterExit.RespawnPlayer(
+                        worldPos.X,
+                        worldPos.Y,
+                        true,
+                        true);
 
-                regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
-                Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
-                Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+                    regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
+                    Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
+                    Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+                }
+                else
+                {
+                    Debug.Log("No Valid Dungeon Locations To Teleport To, Try Making Your Settings Less Strict.");
+                }
             }
 
+			// Add a Yes/No text-box choice when the character first starts, this way if they don't wish to goto a random dungeon they can say "No" and "Yes" if they do.
+			
             // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
 
             // Possibly will also add a custom console command for this mod that will allow the player to teleport to a random dungeon on use of said command, check clock mod for examples.
-
-            // See what happens if no place is valid, if so, make a "fall-back" dungeon such as Privateers Hold or something to go to.
 			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
-
-            // So this seems to be working, at least gets player to the entrance inside the random dungeon. Will work on getting this properly migrated into parent mod and settings.
+            // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
         }
 
         public static int[] CollectDungeonIndicesOfType(DFRegion regionData, int regionIndex)
