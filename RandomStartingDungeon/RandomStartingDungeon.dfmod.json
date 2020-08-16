@@ -8,6 +8,7 @@
     "GUID": "93b90aac-1504-4cf4-a065-8ee0bb29ceb4",
     "Files": [
         "Assets/Game/Mods/RandomStartingDungeon/modsettings.json",
-        "Assets/Game/Mods/RandomStartingDungeon/Scripts/RandomStartingDungeon.cs"
+        "Assets/Game/Mods/RandomStartingDungeon/Scripts/RandomStartingDungeon.cs",
+        "Assets/Game/Mods/RandomStartingDungeon/Scripts/RandomStartingDungeonConsoleCommands.cs"
     ]
 }

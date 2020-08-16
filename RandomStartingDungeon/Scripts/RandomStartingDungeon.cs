@@ -5,7 +5,7 @@
 // Created On: 	    8/12/2020, 5:05 PM
 // Last Edit:		8/15/2020, 2:40 PM
 // Version:			1.00
-// Special Thanks:  Jehuty
+// Special Thanks:  Jehuty, TheLacus
 // Modifier:
 
 using DaggerfallConnect;
@@ -25,7 +25,14 @@ namespace RandomStartingDungeon
 {
     public class RandomStartingDungeon : MonoBehaviour
 	{
-		static Mod mod;
+        static RandomStartingDungeon instance;
+
+        public static RandomStartingDungeon Instance
+        {
+            get { return instance ?? (instance = FindObjectOfType<RandomStartingDungeon>()); }
+        }
+
+        static Mod mod;
 
         // Region Specific and Quest Dungeon Options
         public static bool questDungStartCheck { get; set; }
@@ -74,8 +81,7 @@ namespace RandomStartingDungeon
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
-            var go = new GameObject("RandomStartingDungeon");
-            go.AddComponent<RandomStartingDungeon>();
+            instance = new GameObject("RandomStartingDungeon").AddComponent<RandomStartingDungeon>(); // Add script to the scene.
         }
 		
 		void Awake()
@@ -493,8 +499,6 @@ namespace RandomStartingDungeon
 
             StartGameBehaviour.OnStartGame += RandomizeSpawn_OnStartGame;
 
-            EntityEffectBroker.OnNewMagicRound += TeleRandomDungeonTest_OnNewMagicRound; // Just for testing purposes, final will be only for starting new character, and a console command.
-
             Debug.Log("Finished mod init: RandomStartingDungeon");
 		}
 
@@ -502,9 +506,12 @@ namespace RandomStartingDungeon
 
         #region Methods and Functions
 
-        // Testing
+        private static void RandomizeSpawn_OnStartGame(object sender, EventArgs e)
+        {
+            PickRandomDungeonTeleport();
+        }
 
-        private static void TeleRandomDungeonTest_OnNewMagicRound()
+        public static void PickRandomDungeonTeleport()
         {
             DFRegion regionInfo = new DFRegion();
             int[] foundIndices = new int[0];
@@ -598,8 +605,6 @@ namespace RandomStartingDungeon
 			// Add a Yes/No text-box choice when the character first starts, this way if they don't wish to goto a random dungeon they can say "No" and "Yes" if they do.
 			
             // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
-
-            // Possibly will also add a custom console command for this mod that will allow the player to teleport to a random dungeon on use of said command, check clock mod for examples.
 			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
@@ -830,13 +835,6 @@ namespace RandomStartingDungeon
         {
             int randIndex = UnityEngine.Random.Range(0, regionList.Length);
             return regionList[randIndex];
-        }
-
-        // Testing
-
-        private static void RandomizeSpawn_OnStartGame(object sender, EventArgs e)
-        {
-
         }
 
         #endregion
