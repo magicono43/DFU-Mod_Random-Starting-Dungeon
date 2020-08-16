@@ -14,6 +14,8 @@ using DaggerfallConnect.Utility;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.MagicAndEffects;
+using DaggerfallWorkshop.Game.UserInterface;
+using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
@@ -506,9 +508,34 @@ namespace RandomStartingDungeon
 
         #region Methods and Functions
 
-        private static void RandomizeSpawn_OnStartGame(object sender, EventArgs e)
+        public static void RandomizeSpawn_OnStartGame(object sender, EventArgs e)
         {
-            PickRandomDungeonTeleport();
+            TextFile.Token[] tokens = DaggerfallUnity.Instance.TextProvider.CreateTokens(
+                        TextFile.Formatting.JustifyCenter,
+                        "Do you want to be sent to a random dungeon?",
+                        "",
+                        "(If Yes, expect 1-2 minutes of unresponsiveness",
+                        "while initial location filtering is processed.)");
+            DaggerfallMessageBox randomStartConfirmBox = new DaggerfallMessageBox(DaggerfallUI.UIManager);
+
+            randomStartConfirmBox.SetTextTokens(tokens);
+            randomStartConfirmBox.AddButton(DaggerfallMessageBox.MessageBoxButtons.Yes);
+            randomStartConfirmBox.AddButton(DaggerfallMessageBox.MessageBoxButtons.No);
+            randomStartConfirmBox.OnButtonClick += ConfirmRandomStart_OnButtonClick;
+            DaggerfallUI.UIManager.PushWindow(randomStartConfirmBox); // Would like to figure out a way to put this window at the "end" of the stack, as to only show up as the final window in the que.
+        }
+
+        public static void ConfirmRandomStart_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
+        {
+            sender.CloseWindow();
+            if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.Yes)
+            {
+                PickRandomDungeonTeleport();
+            }
+            else if (messageBoxButton == DaggerfallMessageBox.MessageBoxButtons.No)
+            {
+                return;
+            }
         }
 
         public static void PickRandomDungeonTeleport()
@@ -601,9 +628,6 @@ namespace RandomStartingDungeon
                     Debug.Log("No Valid Dungeon Locations To Teleport To, Try Making Your Settings Less Strict.");
                 }
             }
-
-			// Add a Yes/No text-box choice when the character first starts, this way if they don't wish to goto a random dungeon they can say "No" and "Yes" if they do.
-			
             // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
 			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
