@@ -65,6 +65,11 @@ namespace RandomStartingDungeon
         public static bool orcStrongholdStartCheck { get; set; }
         public static bool cryptStartCheck { get; set; }
 
+        // General "Global" Variables
+        public static bool alreadyRolled { get; set; }
+        public static Dictionary<int, int[]> quickRerollDictionary { get; set; }
+        public static List<int> quickRerollValidRegions { get; set; }
+
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
@@ -479,6 +484,8 @@ namespace RandomStartingDungeon
                 cryptStartCheck = false;
             }
 
+            alreadyRolled = false;
+
             StartGameBehaviour.OnStartGame += RandomizeSpawn_OnStartGame;
 
             EntityEffectBroker.OnNewMagicRound += TeleRandomDungeonTest_OnNewMagicRound; // Just for testing purposes, final will be only for starting new character, and a console command.
@@ -500,48 +507,84 @@ namespace RandomStartingDungeon
             Dictionary<int, int[]> regionValidDungGrabBag = new Dictionary<int, int[]>();
 			regionValidDungGrabBag.Clear(); // Attempts to clear dictionary to keep from compile errors about duplicate keys.
 
-            for (int n = 0; n < 62; n++)
+            if (!alreadyRolled)
             {
-                regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(n);
-                if (regionInfo.LocationCount <= 0) // Add the if-statements to keep "invalid" regions from being put into grab-bag, also use this for some settings.
-                    continue;
-                if (n == 31) // Index for "High Rock sea coast" or the "region" that holds the location of the two player boats, as well as the Mantellan Crux story dungeon.
-                    continue;
-                if (!isolatedIslandStartCheck && n == 61) // Index for "Cybiades" the isolated region that has only one single location on the whole island, that being a dungeon.
-                    continue;
-                // Get indices for all dungeons of this type
-                foundIndices = CollectDungeonIndicesOfType(regionInfo, n);
-                if (foundIndices.Length == 0)
-                    continue;
+                for (int n = 0; n < 62; n++)
+                {
+                    regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(n);
+                    if (regionInfo.LocationCount <= 0) // Add the if-statements to keep "invalid" regions from being put into grab-bag, also use this for some settings.
+                        continue;
+                    if (n == 31) // Index for "High Rock sea coast" or the "region" that holds the location of the two player boats, as well as the Mantellan Crux story dungeon.
+                        continue;
+                    if (!isolatedIslandStartCheck && n == 61) // Index for "Cybiades" the isolated region that has only one single location on the whole island, that being a dungeon.
+                        continue;
+                    // Get indices for all dungeons of this type
+                    foundIndices = CollectDungeonIndicesOfType(regionInfo, n);
+                    if (foundIndices.Length == 0)
+                        continue;
 
-                regionValidDungGrabBag.Add(n, foundIndices);
-                validRegionIndexes.Add(n); // Obviously will need to do a lot of testing, but I think all of the main settings and options are set-up for now.
+                    regionValidDungGrabBag.Add(n, foundIndices);
+                    validRegionIndexes.Add(n);
+                    alreadyRolled = true; // Too keep this code-block from reprocessing every-time this function is ran again in the same play session.
+                    quickRerollDictionary = regionValidDungGrabBag;
+                    quickRerollValidRegions = validRegionIndexes;
+                }
             }
 
-            int randomRegionIndex = RandomRegionRoller(validRegionIndexes.ToArray());
-            foundIndices = regionValidDungGrabBag[randomRegionIndex];
+            if (!alreadyRolled)
+            {
+                int randomRegionIndex = RandomRegionRoller(validRegionIndexes.ToArray());
+                foundIndices = regionValidDungGrabBag[randomRegionIndex];
 
-            // Select a random dungeon location index from available list then get its location data
-            int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
-            DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
+                // Select a random dungeon location index from available list then get its location data
+                int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
+                DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
 
-            // Spawn inside dungeon at this world position
-            DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
-            DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
-            GameManager.Instance.PlayerEnterExit.RespawnPlayer(
-                worldPos.X,
-                worldPos.Y,
-                true,
-                true);
+                // Spawn inside dungeon at this world position
+                DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
+                DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
+                GameManager.Instance.PlayerEnterExit.RespawnPlayer(
+                    worldPos.X,
+                    worldPos.Y,
+                    true,
+                    true);
+
+                regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
+                Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
+                Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+            }
+            else
+            {
+                int randomRegionIndex = RandomRegionRoller(quickRerollValidRegions.ToArray());
+                foundIndices = quickRerollDictionary[randomRegionIndex];
+
+                // Select a random dungeon location index from available list then get its location data
+                int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
+                DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
+
+                // Spawn inside dungeon at this world position
+                DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
+                DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
+                GameManager.Instance.PlayerEnterExit.RespawnPlayer(
+                    worldPos.X,
+                    worldPos.Y,
+                    true,
+                    true);
+
+                regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
+                Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
+                Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+            }
 
             // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
 
             // Possibly will also add a custom console command for this mod that will allow the player to teleport to a random dungeon on use of said command, check clock mod for examples.
 
-            // So this seems to be working, at least gets player to the entrance inside the random dungeon. Will work on getting this properly migrated into parent mod and settings.
+            // See what happens if no place is valid, if so, make a "fall-back" dungeon such as Privateers Hold or something to go to.
+			
+			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
 
-            Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
-            Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
+            // So this seems to be working, at least gets player to the entrance inside the random dungeon. Will work on getting this properly migrated into parent mod and settings.
         }
 
         public static int[] CollectDungeonIndicesOfType(DFRegion regionData, int regionIndex)
