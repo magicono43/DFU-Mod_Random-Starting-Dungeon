@@ -619,27 +619,27 @@ namespace RandomStartingDungeon
 
                     // Will hopefully find a "random" spot within a random block of a dungeon and return a value that can be teleported to, not sure what format that value will be in right now.
                     SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
-                    int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
-                    SpawnPoints spawnPoint = new SpawnPoints();
-                    spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
-                    spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
-                    spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
-                    spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
-                    spawnPointGlobal = spawnPoint;
+                    if (SpawnLocations != null)
+                    {
+                        int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
+                        SpawnPoints spawnPoint = new SpawnPoints();
+                        spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
+                        spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
+                        spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
+                        spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
+                        spawnPointGlobal = spawnPoint;
+                    }
+                    else
+                        Debug.Log("Transformation Failed, Could Not Find Valid Dungeon Position.");
 
                     // Spawn inside dungeon at this world position
-                    DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
+                    DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel(dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
                     DFPosition worldPos = MapsFile.MapPixelToWorldCoord(mapPixel.X, mapPixel.Y);
                     GameManager.Instance.PlayerEnterExit.RespawnPlayer(
                         worldPos.X,
                         worldPos.Y,
                         true,
                         true);
-
-                    /*// Teleport PC to the randomly determined "spawn point" within the current dungeon.
-                    Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
-                    GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
-                    GameManager.Instance.PlayerMotor.FixStanding();*/
 
                     regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
                     Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
@@ -651,9 +651,7 @@ namespace RandomStartingDungeon
                 }
                 PlayerEnterExit.OnRespawnerComplete += TeleToSpawnPoint_OnRespawnerComplete;
             }
-            // Now that I got the random teleport "spawn points" inside dungeons working. I have to refine it, first i'm going to try and filter out dungeon blocks that can trap the player, or are especially mean, such as certain "underwater" starts. I will determine this with the "Daggerfall Modeling" tool.
-
-            // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
+			// See if I can make the climate and dungeon type checks into switch-case checks instead of the large if-statement chains, likely increase speed by a lot this way.
 			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
@@ -663,27 +661,36 @@ namespace RandomStartingDungeon
         {
             if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon && alreadyRolled) // This will defintiely have to be changed, for logic with more discrimination on when it runs.
             {
-                TransformPlayerPosition();
+                bool successCheck = TransformPlayerPosition();
+
+                if (!successCheck)
+                    DaggerfallUI.AddHUDText("Transformation Failed, Could Not Find Valid Dungeon Position.", 6.00f);
             }
         }
 
-        public static void TransformPlayerPosition()
+        public static bool TransformPlayerPosition()
         {
             DFLocation dungLocation = dungLocationGlobal;
             SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
-            int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
-            SpawnPoints spawnPoint = new SpawnPoints();
-            spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
-            spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
-            spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
-            spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
+            if (SpawnLocations != null)
+            {
+                int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
+                SpawnPoints spawnPoint = new SpawnPoints();
+                spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
+                spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
+                spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
+                spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
 
-            //SpawnPoints transPos = spawnPointGlobal;
+                //SpawnPoints transPos = spawnPointGlobal;
 
-            // Teleport PC to the randomly determined "spawn point" within the current dungeon.
-            Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
-            GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
-            GameManager.Instance.PlayerMotor.FixStanding();
+                // Teleport PC to the randomly determined "spawn point" within the current dungeon.
+                Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
+                GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
+                GameManager.Instance.PlayerMotor.FixStanding();
+                return true;
+            }
+            else
+                return false;
         }
 
         public static SpawnPoints[] RandomBlockLocationPicker(DFLocation location)
@@ -738,7 +745,7 @@ namespace RandomStartingDungeon
                         {
                             if (obj.Resources.FlatResource.TextureArchive == editorFlatArchive)
                             {
-                                switch (obj.Resources.FlatResource.TextureRecord)
+                                switch (obj.Resources.FlatResource.TextureRecord) // May consider eventually adding more valid spawn locations than just quest-markers.
                                 {
                                     case spawnMarkerFlatIndex:
                                         spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z, markerID));

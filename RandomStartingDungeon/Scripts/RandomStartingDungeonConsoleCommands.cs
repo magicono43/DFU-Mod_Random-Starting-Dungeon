@@ -63,9 +63,12 @@ namespace RandomStartingDungeon
                 if (randomStartingDungeon == null)
                     return noInstanceMessage;
 
-                RandomStartingDungeon.TransformPlayerPosition();
+                bool successCheck = RandomStartingDungeon.TransformPlayerPosition();
 
-                return "Transforming Player Dungeon Position...";
+                if (successCheck)
+                    return "Transforming Player Dungeon Position...";
+                else
+                    return "Transformation Failed, Could Not Find Valid Dungeon Position.";
             }
         }
 
