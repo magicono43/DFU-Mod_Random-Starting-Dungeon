@@ -19,6 +19,7 @@ using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
+using DaggerfallWorkshop.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -78,6 +79,11 @@ namespace RandomStartingDungeon
         public static bool alreadyRolled { get; set; }
         public static Dictionary<int, int[]> quickRerollDictionary { get; set; }
         public static List<int> quickRerollValidRegions { get; set; }
+        const int editorFlatArchive = 199;
+        const int spawnMarkerFlatIndex = 11;
+        const int itemMarkerFlatIndex = 18;
+        public static SpawnPoints spawnPointGlobal { get; set; }
+        public static DFLocation dungLocationGlobal { get; set; }
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
@@ -609,6 +615,17 @@ namespace RandomStartingDungeon
                     // Select a random dungeon location index from available list then get its location data
                     int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
                     DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
+                    dungLocationGlobal = dungLocation;
+
+                    // Will hopefully find a "random" spot within a random block of a dungeon and return a value that can be teleported to, not sure what format that value will be in right now.
+                    SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
+                    int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
+                    SpawnPoints spawnPoint = new SpawnPoints();
+                    spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
+                    spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
+                    spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
+                    spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
+                    spawnPointGlobal = spawnPoint;
 
                     // Spawn inside dungeon at this world position
                     DFPosition mapPixel = MapsFile.LongitudeLatitudeToMapPixel((int)dungLocation.MapTableData.Longitude, dungLocation.MapTableData.Latitude);
@@ -619,6 +636,11 @@ namespace RandomStartingDungeon
                         true,
                         true);
 
+                    /*// Teleport PC to the randomly determined "spawn point" within the current dungeon.
+                    Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
+                    GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
+                    GameManager.Instance.PlayerMotor.FixStanding();*/
+
                     regionInfo = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(randomRegionIndex);
                     Debug.LogFormat("Random Region Index # {0} has {1} locations = {2} and {3} of those are valid dungeons", randomRegionIndex, regionInfo.LocationCount, regionInfo.Name, foundIndices.Length);
                     Debug.LogFormat("Random Dungeon Index # {0} in the Region {1} = {2}, Dungeon Type is a {3}", RandDungIndex, regionInfo.Name, dungLocation.Name, dungLocation.MapTableData.DungeonType.ToString());
@@ -627,11 +649,134 @@ namespace RandomStartingDungeon
                 {
                     Debug.Log("No Valid Dungeon Locations To Teleport To, Try Making Your Settings Less Strict.");
                 }
+                PlayerEnterExit.OnRespawnerComplete += TeleToSpawnPoint_OnRespawnerComplete;
             }
+            // Now that I got the random teleport "spawn points" inside dungeons working. I have to refine it, first i'm going to try and filter out dungeon blocks that can trap the player, or are especially mean, such as certain "underwater" starts. I will determine this with the "Daggerfall Modeling" tool.
+
             // Will likely attempt to figure out some way to teleport the player somewhere "random" within the dungeon, instead of always at the exit of it, make an option for this as well.
 			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
+        }
+
+        public static void TeleToSpawnPoint_OnRespawnerComplete()
+        {
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon && alreadyRolled) // This will defintiely have to be changed, for logic with more discrimination on when it runs.
+            {
+                TransformPlayerPosition();
+            }
+        }
+
+        public static void TransformPlayerPosition()
+        {
+            DFLocation dungLocation = dungLocationGlobal;
+            SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
+            int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
+            SpawnPoints spawnPoint = new SpawnPoints();
+            spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
+            spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
+            spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
+            spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
+
+            //SpawnPoints transPos = spawnPointGlobal;
+
+            // Teleport PC to the randomly determined "spawn point" within the current dungeon.
+            Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
+            GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
+            GameManager.Instance.PlayerMotor.FixStanding();
+        }
+
+        public static SpawnPoints[] RandomBlockLocationPicker(DFLocation location)
+        {
+            List<SpawnPoints> spawnPointsList = new List<SpawnPoints>();
+
+            // Step through dungeon layout to find all blocks with markers
+            foreach (var dungeonBlock in location.Dungeon.Blocks)
+            {
+                // Get block data
+                DFBlock blockData = DaggerfallUnity.Instance.ContentReader.BlockFileReader.GetBlock(dungeonBlock.BlockName);
+
+                // Skip misplaced overlapping N block at -1,-1 in Orsinium
+                // This must be a B block to close out dungeon on that edge, not an N block which opens dungeon to void
+                // DaggerfallDungeon skips this N block during layout, so prevent it being available to quest system
+                if (location.MapTableData.MapId == 19021260 &&
+                    dungeonBlock.X == -1 && dungeonBlock.Z == -1 && dungeonBlock.BlockName == "N0000065.RDB")
+                {
+                    continue;
+                }
+
+                if (dungeonBlock.BlockName == "W0000002.RDB" || dungeonBlock.BlockName == "W0000004.RDB" || dungeonBlock.BlockName == "W0000005.RDB" || dungeonBlock.BlockName == "W0000009.RDB" ||
+                    dungeonBlock.BlockName == "W0000013.RDB" || dungeonBlock.BlockName == "W0000017.RDB" || dungeonBlock.BlockName == "W0000018.RDB" || dungeonBlock.BlockName == "W00000024.RDB") 
+                {
+                    continue; // Filters out all "unfair" underwater blocks.
+                }
+
+                if (dungeonBlock.BlockName == "N0000004.RDB" || dungeonBlock.BlockName == "N0000005.RDB" || dungeonBlock.BlockName == "N0000006.RDB" || dungeonBlock.BlockName == "N0000023.RDB" ||
+                    dungeonBlock.BlockName == "N0000030.RDB" || dungeonBlock.BlockName == "N0000033.RDB" || dungeonBlock.BlockName == "N0000034.RDB" || dungeonBlock.BlockName == "N0000036.RDB" ||
+                    dungeonBlock.BlockName == "N0000037.RDB" || dungeonBlock.BlockName == "N0000038.RDB" || dungeonBlock.BlockName == "N0000046.RDB" || dungeonBlock.BlockName == "N0000054.RDB" ||
+                    dungeonBlock.BlockName == "N0000061.RDB")
+                {
+                    continue; // Filters out all "unfair" dry blocks.
+                }
+
+                // Iterate all groups
+                foreach (DFBlock.RdbObjectRoot group in blockData.RdbBlock.ObjectRootList)
+                {
+                    // Skip empty object groups
+                    if (null == group.RdbObjects)
+                        continue;
+
+                    // Look for flats in this group
+                    foreach (DFBlock.RdbObject obj in group.RdbObjects)
+                    {
+                        // Get marker ID
+                        ulong markerID = (ulong)(blockData.Position + obj.Position);
+
+                        // Look for editor flats
+                        Vector3 position = new Vector3(obj.XPos, -obj.YPos, obj.ZPos) * MeshReader.GlobalScale;
+                        if (obj.Type == DFBlock.RdbResourceTypes.Flat)
+                        {
+                            if (obj.Resources.FlatResource.TextureArchive == editorFlatArchive)
+                            {
+                                switch (obj.Resources.FlatResource.TextureRecord)
+                                {
+                                    case spawnMarkerFlatIndex:
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z, markerID));
+                                        break;
+                                    case itemMarkerFlatIndex:
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z, markerID));
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Assign arrays if at least one quest marker found
+            if (spawnPointsList.Count > 0)
+                return spawnPointsList.ToArray();
+            else
+                return null;
+        }
+
+        public struct SpawnPoints
+        {
+            public Vector3 flatPosition;                // Position of marker flat in block layout
+            public int dungeonX;                        // Dungeon block X position in location
+            public int dungeonZ;                        // Dungeon block Z position in location
+            public ulong markerID;                      // Marker ID for dungeon markers
+        }
+
+        public static SpawnPoints CreateSpawnPoint(Vector3 flatPosition, int dungeonX = 0, int dungeonZ = 0, ulong markerID = 0)
+        {
+            SpawnPoints spawnPoints = new SpawnPoints();
+            spawnPoints.flatPosition = flatPosition;
+            spawnPoints.dungeonX = dungeonX;
+            spawnPoints.dungeonZ = dungeonZ;
+            spawnPoints.markerID = markerID;
+
+            return spawnPoints;
         }
 
         public static int[] CollectDungeonIndicesOfType(DFRegion regionData, int regionIndex)
@@ -654,7 +799,7 @@ namespace RandomStartingDungeon
                     continue;
                 if (!mountainStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Mountain)                 // Mountain 
                     continue;
-                if (!rainforestStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Rainforest)             // Rainforest 
+                if (!rainforestStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Rainforest)             // Rainforest  // Could likely make this faster by doing a switch for the location climate type and then checking if the option is enabled or not, will think of doing that.
                     continue;
                 if (!swampStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Swamp)                       // Swamp 
                     continue;
@@ -718,7 +863,7 @@ namespace RandomStartingDungeon
                 return true;
             if (!harpyNestStartCheck && dungeonType == DFRegion.DungeonTypes.HarpyNest)
                 return true;
-            if (!laboratoryStartCheck && dungeonType == DFRegion.DungeonTypes.Laboratory)
+            if (!laboratoryStartCheck && dungeonType == DFRegion.DungeonTypes.Laboratory) // Could likely make this faster by doing a switch for the location climate type and then checking if the option is enabled or not, will think of doing that.
                 return true;
             if (!vampireHauntStartCheck && dungeonType == DFRegion.DungeonTypes.VampireHaunt)
                 return true;
@@ -859,6 +1004,35 @@ namespace RandomStartingDungeon
         {
             int randIndex = UnityEngine.Random.Range(0, regionList.Length);
             return regionList[randIndex];
+        }
+
+        #endregion
+
+        #region Console Command Specific Methods
+
+        public static void FindCurrentBlockInfo()
+        {
+            PlayerGPS playerGPS = GameManager.Instance.PlayerGPS;
+            if (playerGPS.HasCurrentLocation)
+            {
+                DFLocation location = playerGPS.CurrentLocation;
+                GameObject gameObjectPlayerAdvanced = null; // used to hold reference to instance of GameObject "PlayerAdvanced"
+                gameObjectPlayerAdvanced = GameObject.Find("PlayerAdvanced");
+                float playerPosX = gameObjectPlayerAdvanced.transform.position.x / RDBLayout.RDBSide;
+                float playerPosY = gameObjectPlayerAdvanced.transform.position.z / RDBLayout.RDBSide;
+                Debug.LogFormat("X-pos = {0} || Y-pos = {1}", (int)(Mathf.Floor(playerPosX)), (int)(Mathf.Floor(playerPosY)));
+
+                if (location.HasDungeon)
+                {
+                    foreach (var dungeonBlock in location.Dungeon.Blocks)
+                    {
+                        if (dungeonBlock.X == (int)Mathf.Floor(playerPosX) && dungeonBlock.Z == (int)Mathf.Floor(playerPosY))
+                        {
+                            DaggerfallUI.AddHUDText(String.Format("Current Dungeon Block Name = {0} || Block X-pos = {1} || Block Z-pos = {2}", dungeonBlock.BlockName, dungeonBlock.X, dungeonBlock.Z), 5.00f);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

@@ -24,6 +24,8 @@ namespace RandomStartingDungeon
             try
             {
                 ConsoleCommandsDatabase.RegisterCommand(ManualRandomTeleport.name, ManualRandomTeleport.description, ManualRandomTeleport.usage, ManualRandomTeleport.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(TransformDungPos.name, TransformDungPos.description, TransformDungPos.usage, TransformDungPos.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(CurrentBlockInfo.name, CurrentBlockInfo.description, CurrentBlockInfo.usage, CurrentBlockInfo.Execute);
             }
             catch (Exception e)
             {
@@ -46,6 +48,42 @@ namespace RandomStartingDungeon
                 RandomStartingDungeon.PickRandomDungeonTeleport();
 
                 return "Teleporting To Random Dungeon Now...";
+            }
+        }
+
+        private static class TransformDungPos
+        {
+            public static readonly string name = "transform_dung_pos";
+            public static readonly string description = "Randomly Transform Position Of Player Inside Dungeon";
+            public static readonly string usage = "Randomly Transform Player Position In Dungeon";
+
+            public static string Execute(params string[] args)
+            {
+                var randomStartingDungeon = RandomStartingDungeon.Instance;
+                if (randomStartingDungeon == null)
+                    return noInstanceMessage;
+
+                RandomStartingDungeon.TransformPlayerPosition();
+
+                return "Transforming Player Dungeon Position...";
+            }
+        }
+
+        private static class CurrentBlockInfo
+        {
+            public static readonly string name = "current_block_info";
+            public static readonly string description = "Display The Block Info Of Block Player Is Currently Standing In";
+            public static readonly string usage = "Display The Current Block Info";
+
+            public static string Execute(params string[] args)
+            {
+                var randomStartingDungeon = RandomStartingDungeon.Instance;
+                if (randomStartingDungeon == null)
+                    return noInstanceMessage;
+
+                RandomStartingDungeon.FindCurrentBlockInfo();
+
+                return "Transforming Player Dungeon Position...";
             }
         }
     }
