@@ -796,28 +796,55 @@ namespace RandomStartingDungeon
                 // Discard all non-dungeon location types
                 if (!IsLocationType(regionData.MapTable[i].LocationType) || IsDungeonType(regionData.MapTable[i].DungeonType))
                     continue;
-                // Discard all dungeon locations that don't comply with climate filter settings           // regionData.MapTable[i].LocationId //
+                // Discard all dungeon locations that don't comply with climate filter settings
                 DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(regionIndex, i);
-                if (!oceanStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Ocean)                       // Ocean (Vanilla does not have any random dungeons in this climate) 
-                    continue;
-                if (!desertStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Desert)                     // Desert 
-                    continue;
-                if (!desertHotStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Desert2)                 // Desert2 (Hottest desert, dak'fron has this) 
-                    continue;
-                if (!mountainStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Mountain)                 // Mountain 
-                    continue;
-                if (!rainforestStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Rainforest)             // Rainforest  // Could likely make this faster by doing a switch for the location climate type and then checking if the option is enabled or not, will think of doing that.
-                    continue;
-                if (!swampStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Swamp)                       // Swamp 
-                    continue;
-                if (!subtropicalStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Subtropical)           // Subtropical 
-                    continue;
-                if (!mountainWoodsStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.MountainWoods)       // MountainWoods 
-                    continue;
-                if (!woodlandsStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.Woodlands)               // Woodlands 
-                    continue;
-                if (!hauntedWoodlandsStartCheck && dungLocation.Climate.WorldClimate == (int)MapsFile.Climates.HauntedWoodlands) // HauntedWoodlands 
-                    continue;
+
+                switch (dungLocation.Climate.WorldClimate)
+                {
+                    case (int)MapsFile.Climates.Ocean:
+                        if (!oceanStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Desert:
+                        if (!desertStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Desert2:
+                        if (!desertHotStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Mountain:
+                        if (!mountainStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Rainforest:
+                        if (!rainforestStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Swamp:
+                        if (!swampStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Subtropical:
+                        if (!subtropicalStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.MountainWoods:
+                        if (!mountainWoodsStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.Woodlands:
+                        if (!woodlandsStartCheck)
+                            continue;
+                        break;
+                    case (int)MapsFile.Climates.HauntedWoodlands:
+                        if (!hauntedWoodlandsStartCheck)
+                            continue;
+                        break;
+                    default:
+                        break;
+                }
+
                 // Discard Main-quest Dungeons if the setting has these disabled, they are disabled by default
                 if (!questDungStartCheck && MainQuestDungeonChecker(regionIndex, dungLocation.Name))
                     continue;
@@ -852,44 +879,87 @@ namespace RandomStartingDungeon
         public static bool IsDungeonType(DFRegion.DungeonTypes dungeonType)
         {
             // Will exclude Cemetery type dungeons by default, the ones that are revealed by default and very small interior size.
-            if (!cemeteryStartCheck && dungeonType == DFRegion.DungeonTypes.Cemetery)
-                return true;
-            if (!scorpionNestStartCheck && dungeonType == DFRegion.DungeonTypes.ScorpionNest)
-                return true;
-            if (!volcanicCavesStartCheck && dungeonType == DFRegion.DungeonTypes.VolcanicCaves)
-                return true;
-            if (!barbarianStrongholdStartCheck && dungeonType == DFRegion.DungeonTypes.BarbarianStronghold)
-                return true;
-            if (!dragonsDenStartCheck && dungeonType == DFRegion.DungeonTypes.DragonsDen)
-                return true;
-            if (!giantStrongholdStartCheck && dungeonType == DFRegion.DungeonTypes.GiantStronghold)
-                return true;
-            if (!spiderNestStartCheck && dungeonType == DFRegion.DungeonTypes.SpiderNest)
-                return true;
-            if (!ruinedCastleStartCheck && dungeonType == DFRegion.DungeonTypes.RuinedCastle)
-                return true;
-            if (!harpyNestStartCheck && dungeonType == DFRegion.DungeonTypes.HarpyNest)
-                return true;
-            if (!laboratoryStartCheck && dungeonType == DFRegion.DungeonTypes.Laboratory) // Could likely make this faster by doing a switch for the location climate type and then checking if the option is enabled or not, will think of doing that.
-                return true;
-            if (!vampireHauntStartCheck && dungeonType == DFRegion.DungeonTypes.VampireHaunt)
-                return true;
-            if (!covenStartCheck && dungeonType == DFRegion.DungeonTypes.Coven)
-                return true;
-            if (!naturalCaveStartCheck && dungeonType == DFRegion.DungeonTypes.NaturalCave)
-                return true;
-            if (!mineStartCheck && dungeonType == DFRegion.DungeonTypes.Mine)
-                return true;
-            if (!desecratedTempleStartCheck && dungeonType == DFRegion.DungeonTypes.DesecratedTemple)
-                return true;
-            if (!prisonStartCheck && dungeonType == DFRegion.DungeonTypes.Prison)
-                return true;
-            if (!humanStrongholdStartCheck && dungeonType == DFRegion.DungeonTypes.HumanStronghold)
-                return true;
-            if (!orcStrongholdStartCheck && dungeonType == DFRegion.DungeonTypes.OrcStronghold)
-                return true;
-            if (!cryptStartCheck && dungeonType == DFRegion.DungeonTypes.Crypt)
-                return true;
+            switch(dungeonType)
+            {
+                case DFRegion.DungeonTypes.Cemetery:
+                    if (!cemeteryStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.ScorpionNest:
+                    if (!scorpionNestStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.VolcanicCaves:
+                    if (!volcanicCavesStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.BarbarianStronghold:
+                    if (!barbarianStrongholdStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.DragonsDen:
+                    if (!dragonsDenStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.GiantStronghold:
+                    if (!giantStrongholdStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.SpiderNest:
+                    if (!spiderNestStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.RuinedCastle:
+                    if (!ruinedCastleStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.HarpyNest:
+                    if (!harpyNestStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Laboratory:
+                    if (!laboratoryStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.VampireHaunt:
+                    if (!vampireHauntStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Coven:
+                    if (!covenStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.NaturalCave:
+                    if (!naturalCaveStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Mine:
+                    if (!mineStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.DesecratedTemple:
+                    if (!desecratedTempleStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Prison:
+                    if (!prisonStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.HumanStronghold:
+                    if (!humanStrongholdStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.OrcStronghold:
+                    if (!orcStrongholdStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Crypt:
+                    if (!cryptStartCheck)
+                        return true;
+                    break;
+                default:
+                    break;
+            }
 
             return false;
         }
