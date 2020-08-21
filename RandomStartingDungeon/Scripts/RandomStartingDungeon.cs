@@ -651,8 +651,6 @@ namespace RandomStartingDungeon
                 }
                 PlayerEnterExit.OnRespawnerComplete += TeleToSpawnPoint_OnRespawnerComplete;
             }
-			// See if I can make the climate and dungeon type checks into switch-case checks instead of the large if-statement chains, likely increase speed by a lot this way.
-			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
         }
@@ -712,18 +710,33 @@ namespace RandomStartingDungeon
                     continue;
                 }
 
-                if (dungeonBlock.BlockName == "W0000002.RDB" || dungeonBlock.BlockName == "W0000004.RDB" || dungeonBlock.BlockName == "W0000005.RDB" || dungeonBlock.BlockName == "W0000009.RDB" ||
-                    dungeonBlock.BlockName == "W0000013.RDB" || dungeonBlock.BlockName == "W0000017.RDB" || dungeonBlock.BlockName == "W0000018.RDB" || dungeonBlock.BlockName == "W00000024.RDB") 
+                switch(dungeonBlock.BlockName) 
                 {
-                    continue; // Filters out all "unfair" underwater blocks.
-                }
-
-                if (dungeonBlock.BlockName == "N0000004.RDB" || dungeonBlock.BlockName == "N0000005.RDB" || dungeonBlock.BlockName == "N0000006.RDB" || dungeonBlock.BlockName == "N0000023.RDB" ||
-                    dungeonBlock.BlockName == "N0000030.RDB" || dungeonBlock.BlockName == "N0000033.RDB" || dungeonBlock.BlockName == "N0000034.RDB" || dungeonBlock.BlockName == "N0000036.RDB" ||
-                    dungeonBlock.BlockName == "N0000037.RDB" || dungeonBlock.BlockName == "N0000038.RDB" || dungeonBlock.BlockName == "N0000046.RDB" || dungeonBlock.BlockName == "N0000054.RDB" ||
-                    dungeonBlock.BlockName == "N0000061.RDB")
-                {
-                    continue; // Filters out all "unfair" dry blocks.
+                    case "W0000002.RDB":
+                    case "W0000004.RDB":
+                    case "W0000005.RDB":
+                    case "W0000009.RDB":
+                    case "W0000013.RDB":
+                    case "W0000017.RDB":
+                    case "W0000018.RDB":
+                    case "W0000024.RDB":
+                        continue; // Filters out all "unfair" underwater blocks.
+                    case "N0000004.RDB":
+                    case "N0000005.RDB":
+                    case "N0000006.RDB":
+                    case "N0000023.RDB":
+                    case "N0000030.RDB":
+                    case "N0000033.RDB":
+                    case "N0000034.RDB":
+                    case "N0000036.RDB":
+                    case "N0000037.RDB":
+                    case "N0000038.RDB":
+                    case "N0000046.RDB":
+                    case "N0000054.RDB":
+                    case "N0000061.RDB":
+                        continue; // Filters out all "unfair" dry blocks.
+                    default:
+                        break;
                 }
 
                 // Iterate all groups
