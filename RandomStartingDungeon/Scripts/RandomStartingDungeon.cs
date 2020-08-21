@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		8/15/2020, 2:40 PM
+// Last Edit:		8/21/2020, 11:00 AM
 // Version:			1.00
 // Special Thanks:  Jehuty, TheLacus
 // Modifier:
@@ -679,8 +679,6 @@ namespace RandomStartingDungeon
                 spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
                 spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
 
-                //SpawnPoints transPos = spawnPointGlobal;
-
                 // Teleport PC to the randomly determined "spawn point" within the current dungeon.
                 Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
                 GameManager.Instance.PlayerObject.transform.localPosition = dungeonBlockPosition + spawnPoint.flatPosition;
@@ -696,7 +694,7 @@ namespace RandomStartingDungeon
             List<SpawnPoints> spawnPointsList = new List<SpawnPoints>();
 
             // Step through dungeon layout to find all blocks with markers
-            foreach (var dungeonBlock in location.Dungeon.Blocks)
+            foreach (var dungeonBlock in location.Dungeon.Blocks) // May put a "try-catch" block here to catch some compile errors due to no location being defined.
             {
                 // Get block data
                 DFBlock blockData = DaggerfallUnity.Instance.ContentReader.BlockFileReader.GetBlock(dungeonBlock.BlockName);
@@ -720,6 +718,7 @@ namespace RandomStartingDungeon
                     case "W0000017.RDB":
                     case "W0000018.RDB":
                     case "W0000024.RDB":
+                    case "W0000029.RDB":
                         continue; // Filters out all "unfair" underwater blocks.
                     case "N0000004.RDB":
                     case "N0000005.RDB":
