@@ -3,9 +3,9 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		8/21/2020, 11:00 AM
+// Last Edit:		8/23/2020, 5:50 PM
 // Version:			1.00
-// Special Thanks:  Jehuty, TheLacus
+// Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
 using DaggerfallConnect;
@@ -13,8 +13,6 @@ using DaggerfallConnect.Arena2;
 using DaggerfallConnect.Utility;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.MagicAndEffects;
-using DaggerfallWorkshop.Game.UserInterface;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
@@ -528,7 +526,7 @@ namespace RandomStartingDungeon
             randomStartConfirmBox.AddButton(DaggerfallMessageBox.MessageBoxButtons.Yes);
             randomStartConfirmBox.AddButton(DaggerfallMessageBox.MessageBoxButtons.No);
             randomStartConfirmBox.OnButtonClick += ConfirmRandomStart_OnButtonClick;
-            DaggerfallUI.UIManager.PushWindow(randomStartConfirmBox); // Would like to figure out a way to put this window at the "end" of the stack, as to only show up as the final window in the que.
+            DaggerfallUI.UIManager.PushWindow(randomStartConfirmBox);
         }
 
         public static void ConfirmRandomStart_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
@@ -617,7 +615,6 @@ namespace RandomStartingDungeon
                     DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
                     dungLocationGlobal = dungLocation;
 
-                    // Will hopefully find a "random" spot within a random block of a dungeon and return a value that can be teleported to, not sure what format that value will be in right now.
                     SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
                     if (SpawnLocations != null)
                     {
@@ -650,8 +647,6 @@ namespace RandomStartingDungeon
                 }
                 PlayerEnterExit.OnRespawnerComplete += TeleToSpawnPoint_OnRespawnerComplete;
             }
-			// I need to look more into what is causing that OOM specifically with the "TransformPlayerPosition" method, must be something because that's the source of it.
-			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
         }
@@ -789,13 +784,6 @@ namespace RandomStartingDungeon
                 this.dungeonZ = dungeonZ;
             }
         }
-
-        /*public struct SpawnPoints
-        {
-            public Vector3 flatPosition;                // Position of marker flat in block layout
-            public int dungeonX;                        // Dungeon block X position in location
-            public int dungeonZ;                        // Dungeon block Z position in location
-        }*/
 
         public static SpawnPoints CreateSpawnPoint(Vector3 flatPosition, int dungeonX = 0, int dungeonZ = 0)
         {

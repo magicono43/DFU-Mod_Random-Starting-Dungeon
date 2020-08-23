@@ -3,13 +3,12 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		8/21/2020, 11:00 AM
+// Last Edit:		8/23/2020, 5:50 PM
 // Version:			1.00
-// Special Thanks:  Jehuty, TheLacus
+// Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
 using System;
-using System.Globalization;
 using UnityEngine;
 using Wenzil.Console;
 
