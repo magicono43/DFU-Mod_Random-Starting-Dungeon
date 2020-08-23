@@ -622,11 +622,10 @@ namespace RandomStartingDungeon
                     if (SpawnLocations != null)
                     {
                         int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
-                        SpawnPoints spawnPoint = new SpawnPoints();
+                        SpawnPoints spawnPoint = new SpawnPoints(SpawnLocations[RandSpawnIndex].flatPosition, SpawnLocations[RandSpawnIndex].dungeonX, SpawnLocations[RandSpawnIndex].dungeonZ);
                         spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
                         spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
                         spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
-                        spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
                         spawnPointGlobal = spawnPoint;
                     }
                     else
@@ -651,6 +650,8 @@ namespace RandomStartingDungeon
                 }
                 PlayerEnterExit.OnRespawnerComplete += TeleToSpawnPoint_OnRespawnerComplete;
             }
+			// I need to look more into what is causing that OOM specifically with the "TransformPlayerPosition" method, must be something because that's the source of it.
+			
 			// Likely in a later version of this mod, make a menu system similar to the Skyrim Mod "Live Another Life" for the options and background settings possibly of a new character.
             // Also for that "Live Another Life" version, likely add towns/homes/cities, etc to the list of places that can be randomly teleported and brought to and such.
         }
@@ -673,11 +674,10 @@ namespace RandomStartingDungeon
             if (SpawnLocations != null)
             {
                 int RandSpawnIndex = UnityEngine.Random.Range(0, SpawnLocations.Length);
-                SpawnPoints spawnPoint = new SpawnPoints();
+                SpawnPoints spawnPoint = new SpawnPoints(SpawnLocations[RandSpawnIndex].flatPosition, SpawnLocations[RandSpawnIndex].dungeonX, SpawnLocations[RandSpawnIndex].dungeonZ);
                 spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
                 spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
                 spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
-                spawnPoint.markerID = SpawnLocations[RandSpawnIndex].markerID;
 
                 // Teleport PC to the randomly determined "spawn point" within the current dungeon.
                 Vector3 dungeonBlockPosition = new Vector3(spawnPoint.dungeonX * RDBLayout.RDBSide, 0, spawnPoint.dungeonZ * RDBLayout.RDBSide);
@@ -748,9 +748,6 @@ namespace RandomStartingDungeon
                     // Look for flats in this group
                     foreach (DFBlock.RdbObject obj in group.RdbObjects)
                     {
-                        // Get marker ID
-                        ulong markerID = (ulong)(blockData.Position + obj.Position);
-
                         // Look for editor flats
                         Vector3 position = new Vector3(obj.XPos, -obj.YPos, obj.ZPos) * MeshReader.GlobalScale;
                         if (obj.Type == DFBlock.RdbResourceTypes.Flat)
@@ -760,10 +757,10 @@ namespace RandomStartingDungeon
                                 switch (obj.Resources.FlatResource.TextureRecord) // May consider eventually adding more valid spawn locations than just quest-markers.
                                 {
                                     case spawnMarkerFlatIndex:
-                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z, markerID));
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z));
                                         break;
                                     case itemMarkerFlatIndex:
-                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z, markerID));
+                                        spawnPointsList.Add(CreateSpawnPoint(position, dungeonBlock.X, dungeonBlock.Z));
                                         break;
                                 }
                             }
@@ -779,21 +776,33 @@ namespace RandomStartingDungeon
                 return null;
         }
 
-        public struct SpawnPoints
+        public class SpawnPoints
         {
             public Vector3 flatPosition;                // Position of marker flat in block layout
             public int dungeonX;                        // Dungeon block X position in location
             public int dungeonZ;                        // Dungeon block Z position in location
-            public ulong markerID;                      // Marker ID for dungeon markers
+
+            public SpawnPoints(Vector3 flatPosition, int dungeonX, int dungeonZ)
+            {
+                this.flatPosition = flatPosition;
+                this.dungeonX = dungeonX;
+                this.dungeonZ = dungeonZ;
+            }
         }
 
-        public static SpawnPoints CreateSpawnPoint(Vector3 flatPosition, int dungeonX = 0, int dungeonZ = 0, ulong markerID = 0)
+        /*public struct SpawnPoints
         {
-            SpawnPoints spawnPoints = new SpawnPoints();
+            public Vector3 flatPosition;                // Position of marker flat in block layout
+            public int dungeonX;                        // Dungeon block X position in location
+            public int dungeonZ;                        // Dungeon block Z position in location
+        }*/
+
+        public static SpawnPoints CreateSpawnPoint(Vector3 flatPosition, int dungeonX = 0, int dungeonZ = 0)
+        {
+            SpawnPoints spawnPoints = new SpawnPoints(flatPosition, dungeonX, dungeonZ);
             spawnPoints.flatPosition = flatPosition;
             spawnPoints.dungeonX = dungeonX;
             spawnPoints.dungeonZ = dungeonZ;
-            spawnPoints.markerID = markerID;
 
             return spawnPoints;
         }
