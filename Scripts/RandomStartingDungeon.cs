@@ -13,6 +13,7 @@ using DaggerfallConnect.Arena2;
 using DaggerfallConnect.Utility;
 using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
+using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop.Game.UserInterfaceWindows;
 using DaggerfallWorkshop.Game.Utility;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
@@ -659,6 +660,32 @@ namespace RandomStartingDungeon
 
                 if (!successCheck)
                     DaggerfallUI.AddHUDText("Transformation Failed, Could Not Find Valid Dungeon Position.", 6.00f);
+
+
+                GameObject player = GameManager.Instance.PlayerObject;
+                PlayerEntity playerEntity = player.GetComponent<DaggerfallEntityBehaviour>().Entity as PlayerEntity;
+                DaggerfallEntityBehaviour[] entityBehaviours = FindObjectsOfType<DaggerfallEntityBehaviour>();
+
+                if (player != null)
+                {
+                    for (int i = 0; i < entityBehaviours.Length; i++)
+                    {
+                        DaggerfallEntityBehaviour entityBehaviour = entityBehaviours[i];
+                        if (entityBehaviour.EntityType == EntityTypes.EnemyMonster || entityBehaviour.EntityType == EntityTypes.EnemyClass)
+                        {
+                            if (Vector3.Distance(entityBehaviour.transform.position, GameManager.Instance.PlayerController.transform.position) <= 51f)
+                            {
+                                // Is it hostile or pacified?
+                                EnemySenses enemySenses = entityBehaviour.GetComponent<EnemySenses>();
+                                EnemyEntity enemyEntity = entityBehaviour.Entity as EnemyEntity;
+                                if (!enemySenses.QuestBehaviour && enemyEntity.MobileEnemy.Team != MobileTeams.PlayerAlly)
+                                {
+                                    Destroy(entityBehaviour.gameObject);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

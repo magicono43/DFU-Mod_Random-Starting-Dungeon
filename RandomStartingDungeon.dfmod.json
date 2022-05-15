@@ -1,0 +1,14 @@
+{
+    "ModTitle": "RandomStartingDungeon",
+    "ModVersion": "1.01",
+    "ModAuthor": "Kirk.O",
+    "ContactInfo": "kirkoliveri@gmail.com",
+    "DFUnity_Version": "0.13.5",
+    "ModDescription": "Player Starts In A Random Dungeon In The Iliac Bay",
+    "GUID": "93b90aac-1504-4cf4-a065-8ee0bb29ceb4",
+    "Files": [
+        "Assets/Game/Mods/DFU-Mod_Random-Starting-Dungeon/Scripts/RandomStartingDungeon.cs",
+        "Assets/Game/Mods/DFU-Mod_Random-Starting-Dungeon/Scripts/RandomStartingDungeonConsoleCommands.cs",
+        "Assets/Game/Mods/DFU-Mod_Random-Starting-Dungeon/modsettings.json"
+    ]
+}
