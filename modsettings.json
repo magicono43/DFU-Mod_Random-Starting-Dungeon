@@ -241,6 +241,23 @@
                 }
             ],
             "$version": "v1"
+        },
+		{
+            "Name": "MiscOptions",
+            "Description": "Settings For Miscellaneous Things",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Min": 0,
+                    "Max": 200,
+                    "Value": 30,
+                    "Name": "safeZone",
+                    "Description": "Default = 30 || Changes Size Of Safe Zone Cleared Of Enemies Upon Spawning. 0 = Disabled, 200 = Huge",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                }
+            ],
+            "$version": "v1"
         }
     ]
 }

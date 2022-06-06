@@ -3,8 +3,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		8/23/2020, 5:50 PM
-// Version:			1.00
+// Last Edit:		6/6/2022, 1:40 PM
+// Version:			1.02
 // Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
@@ -74,6 +74,9 @@ namespace RandomStartingDungeon
         public static bool orcStrongholdStartCheck { get; set; }
         public static bool cryptStartCheck { get; set; }
 
+        // Misc Options
+        public static int safeZoneSizeSetting { get; set; }
+
         // General "Global" Variables
         public static bool alreadyRolled { get; set; }
         public static Dictionary<int, int[]> quickRerollDictionary { get; set; }
@@ -131,11 +134,14 @@ namespace RandomStartingDungeon
             bool orcStrongholdDungs = settings.GetBool("DungeonTypeOptions", "orcStronghold");
             bool cryptDungs = settings.GetBool("DungeonTypeOptions", "crypt");
 
+            // Misc Options
+            int safeZoneSize = settings.GetInt("MiscOptions", "safeZone");
+
             InitMod(questDungeons, isolatedIslandDungeons, populatedIslandDungeons,
                 oceanDungs, desertDungs, hotDesertDungs, mountainDungs, rainforestDungs, swampDungs, mountainWoodsDungs, woodlandsDungs, hauntedWoodlandsDungs,
                 cemeteryDungs, scorpionNestDungs, volcanicCavesDungs, barbarianStrongholdDungs, dragonsDenDungs, giantStrongholdDungs, spiderNestDungs,
                 ruinedCastleDungs, harpyNestDungs, laboratoryDungs, vampireHauntDungs, covenDungs, naturalCaveDungs, mineDungs, desecratedTempleDungs,
-                prisonDungs, humanStrongholdDungs, orcStrongholdDungs, cryptDungs);
+                prisonDungs, humanStrongholdDungs, orcStrongholdDungs, cryptDungs, safeZoneSize);
 
             mod.IsReady = true;
         }
@@ -152,7 +158,7 @@ namespace RandomStartingDungeon
             bool woodlandsDungs, bool hauntedWoodlandsDungs, bool cemeteryDungs, bool scorpionNestDungs, bool volcanicCavesDungs, bool barbarianStrongholdDungs,
             bool dragonsDenDungs, bool giantStrongholdDungs, bool spiderNestDungs, bool ruinedCastleDungs, bool harpyNestDungs, bool laboratoryDungs,
             bool vampireHauntDungs, bool covenDungs, bool naturalCaveDungs, bool mineDungs, bool desecratedTempleDungs, bool prisonDungs,
-            bool humanStrongholdDungs, bool orcStrongholdDungs, bool cryptDungs)
+            bool humanStrongholdDungs, bool orcStrongholdDungs, bool cryptDungs, int safeZoneSize)
         {
             Debug.Log("Begin mod init: RandomStartingDungeon");
 
@@ -502,6 +508,8 @@ namespace RandomStartingDungeon
                 cryptStartCheck = false;
             }
 
+            safeZoneSizeSetting = safeZoneSize;
+
             alreadyRolled = false;
 
             StartGameBehaviour.OnStartGame += RandomizeSpawn_OnStartGame;
@@ -673,7 +681,7 @@ namespace RandomStartingDungeon
                         DaggerfallEntityBehaviour entityBehaviour = entityBehaviours[i];
                         if (entityBehaviour.EntityType == EntityTypes.EnemyMonster || entityBehaviour.EntityType == EntityTypes.EnemyClass)
                         {
-                            if (Vector3.Distance(entityBehaviour.transform.position, GameManager.Instance.PlayerController.transform.position) <= 51f)
+                            if (Vector3.Distance(entityBehaviour.transform.position, GameManager.Instance.PlayerController.transform.position) <= safeZoneSizeSetting)
                             {
                                 // Is it hostile or pacified?
                                 EnemySenses enemySenses = entityBehaviour.GetComponent<EnemySenses>();
