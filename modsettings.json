@@ -243,6 +243,49 @@
             "$version": "v1"
         },
 		{
+            "Name": "StartDateOptions",
+            "Description": "Settings For If You Want To Start New Games With A Random Date",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": true,
+                    "Name": "randomStartingDate",
+                    "Description": "Allows New Games To Randomly Choose A Starting Date",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "winterMonths",
+                    "Description": "Random Date Can Be Within The Winter Months",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "springMonths",
+                    "Description": "Random Date Can Be Within The Spring Months",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "summerMonths",
+                    "Description": "Random Date Can Be Within The Summer Months",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                },
+                {
+                    "Value": true,
+                    "Name": "fallMonths",
+                    "Description": "Random Date Can Be Within The Fall Months",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        },
+		{
             "Name": "MiscOptions",
             "Description": "Settings For Miscellaneous Things",
             "IsAdvanced": false,

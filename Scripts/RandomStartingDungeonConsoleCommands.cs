@@ -1,10 +1,10 @@
 // Project:         RandomStartingDungeon mod for Daggerfall Unity (http://www.dfworkshop.net)
-// Copyright:       Copyright (C) 2020 Kirk.O
+// Copyright:       Copyright (C) 2022 Kirk.O
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		8/23/2020, 5:50 PM
-// Version:			1.00
+// Last Edit:		7/1/2022, 11:00 PM
+// Version:			1.10
 // Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 

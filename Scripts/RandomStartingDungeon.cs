@@ -1,10 +1,10 @@
 // Project:         RandomStartingDungeon mod for Daggerfall Unity (http://www.dfworkshop.net)
-// Copyright:       Copyright (C) 2020 Kirk.O
+// Copyright:       Copyright (C) 2022 Kirk.O
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		6/6/2022, 1:40 PM
-// Version:			1.02
+// Last Edit:		7/1/2022, 11:00 PM
+// Version:			1.10
 // Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
@@ -74,6 +74,13 @@ namespace RandomStartingDungeon
         public static bool orcStrongholdStartCheck { get; set; }
         public static bool cryptStartCheck { get; set; }
 
+        // Start Date Options
+        public static bool randomStartDateCheck { get; set; }
+        public static bool Winter { get; set; }
+        public static bool Spring { get; set; }
+        public static bool Summer { get; set; }
+        public static bool Fall { get; set; }
+
         // Misc Options
         public static int safeZoneSizeSetting { get; set; }
 
@@ -134,6 +141,13 @@ namespace RandomStartingDungeon
             bool orcStrongholdDungs = settings.GetBool("DungeonTypeOptions", "orcStronghold");
             bool cryptDungs = settings.GetBool("DungeonTypeOptions", "crypt");
 
+            // Starting Date Options
+            bool randomStartDate = settings.GetBool("StartDateOptions", "randomStartingDate");
+            bool winter = settings.GetBool("StartDateOptions", "winterMonths");
+            bool spring = settings.GetBool("StartDateOptions", "springMonths");
+            bool summer = settings.GetBool("StartDateOptions", "summerMonths");
+            bool fall = settings.GetBool("StartDateOptions", "fallMonths");
+
             // Misc Options
             int safeZoneSize = settings.GetInt("MiscOptions", "safeZone");
 
@@ -141,7 +155,7 @@ namespace RandomStartingDungeon
                 oceanDungs, desertDungs, hotDesertDungs, mountainDungs, rainforestDungs, swampDungs, mountainWoodsDungs, woodlandsDungs, hauntedWoodlandsDungs,
                 cemeteryDungs, scorpionNestDungs, volcanicCavesDungs, barbarianStrongholdDungs, dragonsDenDungs, giantStrongholdDungs, spiderNestDungs,
                 ruinedCastleDungs, harpyNestDungs, laboratoryDungs, vampireHauntDungs, covenDungs, naturalCaveDungs, mineDungs, desecratedTempleDungs,
-                prisonDungs, humanStrongholdDungs, orcStrongholdDungs, cryptDungs, safeZoneSize);
+                prisonDungs, humanStrongholdDungs, orcStrongholdDungs, cryptDungs, randomStartDate, winter, spring, summer, fall, safeZoneSize);
 
             mod.IsReady = true;
         }
@@ -158,7 +172,7 @@ namespace RandomStartingDungeon
             bool woodlandsDungs, bool hauntedWoodlandsDungs, bool cemeteryDungs, bool scorpionNestDungs, bool volcanicCavesDungs, bool barbarianStrongholdDungs,
             bool dragonsDenDungs, bool giantStrongholdDungs, bool spiderNestDungs, bool ruinedCastleDungs, bool harpyNestDungs, bool laboratoryDungs,
             bool vampireHauntDungs, bool covenDungs, bool naturalCaveDungs, bool mineDungs, bool desecratedTempleDungs, bool prisonDungs,
-            bool humanStrongholdDungs, bool orcStrongholdDungs, bool cryptDungs, int safeZoneSize)
+            bool humanStrongholdDungs, bool orcStrongholdDungs, bool cryptDungs, bool randomStartDate, bool winter, bool spring, bool summer, bool fall, int safeZoneSize)
         {
             Debug.Log("Begin mod init: RandomStartingDungeon");
 
@@ -508,6 +522,62 @@ namespace RandomStartingDungeon
                 cryptStartCheck = false;
             }
 
+            // Start Date Options
+            if (randomStartDate)
+            {
+                Debug.Log("RandomStartingDungeon: You Will Be Given A Random Starting Date Upon Creating A New Character");
+                randomStartDateCheck = true;
+            }
+            else
+            {
+                Debug.Log("RandomStartingDungeon: You Will Not Be Given A Random Starting Date Upon Creating A New Character");
+                randomStartDateCheck = false;
+            }
+
+            if (winter)
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Winter Months");
+                Winter = true;
+            }
+            else
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Winter Months");
+                Winter = false;
+            }
+
+            if (spring)
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Spring Months");
+                Spring = true;
+            }
+            else
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Spring Months");
+                Spring = false;
+            }
+
+            if (summer)
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Summer Months");
+                Summer = true;
+            }
+            else
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Summer Months");
+                Summer = false;
+            }
+
+            if (fall)
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Fall Months");
+                Fall = true;
+            }
+            else
+            {
+                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Fall Months");
+                Fall = false;
+            }
+
             safeZoneSizeSetting = safeZoneSize;
 
             alreadyRolled = false;
@@ -536,6 +606,31 @@ namespace RandomStartingDungeon
             randomStartConfirmBox.AddButton(DaggerfallMessageBox.MessageBoxButtons.No);
             randomStartConfirmBox.OnButtonClick += ConfirmRandomStart_OnButtonClick;
             DaggerfallUI.UIManager.PushWindow(randomStartConfirmBox);
+
+            if (randomStartDateCheck) // If option is enabled at all.
+            {
+                int time = 0;
+                if (!Winter && !Spring && !Summer && !Fall) {} // Do Nothing                                                                                                                                          0000
+                else if (!Winter && !Spring && !Summer && Fall) { time = UnityEngine.Random.Range(237, 311); } // Roll between Fall months                                                                            0001
+                else if (!Winter && !Spring && Summer && !Fall) { time = UnityEngine.Random.Range(147, 221); } // Roll between Summer months                                                                          0010
+                else if (!Winter && !Spring && Summer && Fall) { time = UnityEngine.Random.Range(147, 321); } // Roll between Summer and Fall months                                                                  0011
+                else if (!Winter && Spring && !Summer && !Fall) { time = UnityEngine.Random.Range(57, 131); } // Roll between Spring months                                                                           0100
+                else if (!Winter && Spring && !Summer && Fall) { time = Dice100.SuccessRoll(50) ? UnityEngine.Random.Range(57, 131) : UnityEngine.Random.Range(237, 311); } // Roll between Spring or Fall months     0101
+                else if (!Winter && Spring && Summer && !Fall) { time = UnityEngine.Random.Range(57, 231); } // Roll between Spring and Summer months                                                                 0110
+                else if (!Winter && Spring && Summer && Fall) { time = UnityEngine.Random.Range(57, 321); } // Roll between Spring and Fall months                                                                    0111
+                else if (Winter && !Spring && !Summer && !Fall) { time = UnityEngine.Random.Range(327, 401); } // Roll between Winter months                                                                          1000
+                else if (Winter && !Spring && !Summer && Fall) { time = UnityEngine.Random.Range(237, 411); } // Roll between Winter and Fall months                                                                  1001
+                else if (Winter && !Spring && Summer && !Fall) { time = Dice100.SuccessRoll(50) ? UnityEngine.Random.Range(327, 401) : UnityEngine.Random.Range(147, 221); } // Roll between Winter or Summer months  1010
+                else if (Winter && !Spring && Summer && Fall) { time = UnityEngine.Random.Range(147, 411); } // Roll between Winter and Summer and Fall months                                                        1011
+                else if (Winter && Spring && !Summer && !Fall) { time = UnityEngine.Random.Range(327, 501); } // Roll between Winter and Spring months                                                                1100
+                else if (Winter && Spring && !Summer && Fall) { time = UnityEngine.Random.Range(237, 501); } // Roll between Winter and Spring and Fall months                                                        1101
+                else if (Winter && Spring && Summer && !Fall) { time = UnityEngine.Random.Range(327, 591); } // Roll between Winter and Summer months                                                                 1110
+                else { time = UnityEngine.Random.Range(1, 360); } // Roll between Any months                                                                                                                          1111
+
+                Debug.LogFormat("Time Increase By {0} Days!", time);
+                time = time * 86400; // time = number of days, 86400 = seconds in a day.
+                DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.RaiseTime(time);
+            }
         }
 
         public static void ConfirmRandomStart_OnButtonClick(DaggerfallMessageBox sender, DaggerfallMessageBox.MessageBoxButtons messageBoxButton)
