@@ -1,10 +1,10 @@
 // Project:         RandomStartingDungeon mod for Daggerfall Unity (http://www.dfworkshop.net)
-// Copyright:       Copyright (C) 2022 Kirk.O
+// Copyright:       Copyright (C) 2023 Kirk.O
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		7/1/2022, 11:00 PM
-// Version:			1.10
+// Last Edit:		4/29/2023, 9:50 AM
+// Version:			1.12
 // Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
@@ -22,572 +22,213 @@ using DaggerfallWorkshop.Utility;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Wenzil.Console;
 
 namespace RandomStartingDungeon
 {
-    public class RandomStartingDungeon : MonoBehaviour
+    public class RandomStartingDungeonMain : MonoBehaviour
 	{
-        static RandomStartingDungeon instance;
-
-        public static RandomStartingDungeon Instance
-        {
-            get { return instance ?? (instance = FindObjectOfType<RandomStartingDungeon>()); }
-        }
+        static RandomStartingDungeonMain Instance;
 
         static Mod mod;
 
         // Region Specific and Quest Dungeon Options
-        public static bool questDungStartCheck { get; set; }
-        public static bool isolatedIslandStartCheck { get; set; }
-        public static bool populatedIslandStartCheck { get; set; }
+        public static bool QuestDungStartCheck { get; set; }
+        public static bool IsolatedIslandStartCheck { get; set; }
+        public static bool PopulatedIslandStartCheck { get; set; }
 
         // Dungeon Location Climate Options
-        public static bool oceanStartCheck { get; set; }
-        public static bool desertStartCheck { get; set; }
-        public static bool desertHotStartCheck { get; set; }
-        public static bool mountainStartCheck { get; set; }
-        public static bool rainforestStartCheck { get; set; }
-        public static bool swampStartCheck { get; set; }
-        public static bool subtropicalStartCheck { get; set; }
-        public static bool mountainWoodsStartCheck { get; set; }
-        public static bool woodlandsStartCheck { get; set; }
-        public static bool hauntedWoodlandsStartCheck { get; set; }
+        public static bool OceanStartCheck { get; set; }
+        public static bool DesertStartCheck { get; set; }
+        public static bool DesertHotStartCheck { get; set; }
+        public static bool MountainStartCheck { get; set; }
+        public static bool RainforestStartCheck { get; set; }
+        public static bool SwampStartCheck { get; set; }
+        public static bool SubtropicalStartCheck { get; set; }
+        public static bool MountainWoodsStartCheck { get; set; }
+        public static bool WoodlandsStartCheck { get; set; }
+        public static bool HauntedWoodlandsStartCheck { get; set; }
 
         // Dungeon Type Options
-        public static bool cemeteryStartCheck { get; set; }
-        public static bool scorpionNestStartCheck { get; set; }
-        public static bool volcanicCavesStartCheck { get; set; }
-        public static bool barbarianStrongholdStartCheck { get; set; }
-        public static bool dragonsDenStartCheck { get; set; }
-        public static bool giantStrongholdStartCheck { get; set; }
-        public static bool spiderNestStartCheck { get; set; }
-        public static bool ruinedCastleStartCheck { get; set; }
-        public static bool harpyNestStartCheck { get; set; }
-        public static bool laboratoryStartCheck { get; set; }
-        public static bool vampireHauntStartCheck { get; set; }
-        public static bool covenStartCheck { get; set; }
-        public static bool naturalCaveStartCheck { get; set; }
-        public static bool mineStartCheck { get; set; }
-        public static bool desecratedTempleStartCheck { get; set; }
-        public static bool prisonStartCheck { get; set; }
-        public static bool humanStrongholdStartCheck { get; set; }
-        public static bool orcStrongholdStartCheck { get; set; }
-        public static bool cryptStartCheck { get; set; }
+        public static bool ScorpionNestStartCheck { get; set; }
+        public static bool VolcanicCavesStartCheck { get; set; }
+        public static bool BarbarianStrongholdStartCheck { get; set; }
+        public static bool DragonsDenStartCheck { get; set; }
+        public static bool GiantStrongholdStartCheck { get; set; }
+        public static bool SpiderNestStartCheck { get; set; }
+        public static bool RuinedCastleStartCheck { get; set; }
+        public static bool HarpyNestStartCheck { get; set; }
+        public static bool LaboratoryStartCheck { get; set; }
+        public static bool VampireHauntStartCheck { get; set; }
+        public static bool CovenStartCheck { get; set; }
+        public static bool NaturalCaveStartCheck { get; set; }
+        public static bool MineStartCheck { get; set; }
+        public static bool DesecratedTempleStartCheck { get; set; }
+        public static bool PrisonStartCheck { get; set; }
+        public static bool HumanStrongholdStartCheck { get; set; }
+        public static bool OrcStrongholdStartCheck { get; set; }
+        public static bool CryptStartCheck { get; set; }
+        public static bool CemeteryStartCheck { get; set; }
 
         // Start Date Options
-        public static bool randomStartDateCheck { get; set; }
+        public static bool RandomStartDateCheck { get; set; }
         public static bool Winter { get; set; }
         public static bool Spring { get; set; }
         public static bool Summer { get; set; }
         public static bool Fall { get; set; }
 
         // Misc Options
-        public static int safeZoneSizeSetting { get; set; }
+        public static int SafeZoneSizeSetting { get; set; }
 
         // General "Global" Variables
-        public static bool alreadyRolled { get; set; }
-        public static Dictionary<int, int[]> quickRerollDictionary { get; set; }
-        public static List<int> quickRerollValidRegions { get; set; }
+        public static bool AlreadyRolled { get; set; }
+        public static Dictionary<int, int[]> QuickRerollDictionary { get; set; }
+        public static List<int> QuickRerollValidRegions { get; set; }
         const int editorFlatArchive = 199;
         const int spawnMarkerFlatIndex = 11;
         const int itemMarkerFlatIndex = 18;
-        public static SpawnPoints spawnPointGlobal { get; set; }
-        public static DFLocation dungLocationGlobal { get; set; }
+        public static SpawnPoints SpawnPointGlobal { get; set; }
+        public static DFLocation DungLocationGlobal { get; set; }
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
-            instance = new GameObject("RandomStartingDungeon").AddComponent<RandomStartingDungeon>(); // Add script to the scene.
-        }
-		
-		void Awake()
-        {
-            ModSettings settings = mod.GetSettings();
-            // Region Specific and Quest Dungeon Options
-            bool questDungeons = settings.GetBool("Quest&IslandOptions", "questDungeons");
-            bool isolatedIslandDungeons = settings.GetBool("Quest&IslandOptions", "isolatedIslandDungeons");
-            bool populatedIslandDungeons = settings.GetBool("Quest&IslandOptions", "populatedIslandDungeons");
+            var go = new GameObject(mod.Title);
+            go.AddComponent<RandomStartingDungeonMain>(); // Add script to the scene.
 
-            // Dungeon Location Climate Options
-            bool oceanDungs = settings.GetBool("ClimateOptions", "ocean");
-            bool desertDungs = settings.GetBool("ClimateOptions", "desert");
-            bool hotDesertDungs = settings.GetBool("ClimateOptions", "hotDesert");
-            bool mountainDungs = settings.GetBool("ClimateOptions", "mountain");
-            bool rainforestDungs = settings.GetBool("ClimateOptions", "rainforest");
-            bool swampDungs = settings.GetBool("ClimateOptions", "swamp");
-            bool mountainWoodsDungs = settings.GetBool("ClimateOptions", "mountainWoods");
-            bool woodlandsDungs = settings.GetBool("ClimateOptions", "woodlands");
-            bool hauntedWoodlandsDungs = settings.GetBool("ClimateOptions", "hauntedWoodlands");
-
-            // Dungeon Type Options
-            bool cemeteryDungs = settings.GetBool("DungeonTypeOptions", "cemetery");
-            bool scorpionNestDungs = settings.GetBool("DungeonTypeOptions", "scorpionNest");
-            bool volcanicCavesDungs = settings.GetBool("DungeonTypeOptions", "volcanicCaves");
-            bool barbarianStrongholdDungs = settings.GetBool("DungeonTypeOptions", "barbarianStronghold");
-            bool dragonsDenDungs = settings.GetBool("DungeonTypeOptions", "dragonsDen");
-            bool giantStrongholdDungs = settings.GetBool("DungeonTypeOptions", "giantStronghold");
-            bool spiderNestDungs = settings.GetBool("DungeonTypeOptions", "spiderNest");
-            bool ruinedCastleDungs = settings.GetBool("DungeonTypeOptions", "ruinedCastle");
-            bool harpyNestDungs = settings.GetBool("DungeonTypeOptions", "harpyNest");
-            bool laboratoryDungs = settings.GetBool("DungeonTypeOptions", "laboratory");
-            bool vampireHauntDungs = settings.GetBool("DungeonTypeOptions", "vampireHaunt");
-            bool covenDungs = settings.GetBool("DungeonTypeOptions", "coven");
-            bool naturalCaveDungs = settings.GetBool("DungeonTypeOptions", "naturalCave");
-            bool mineDungs = settings.GetBool("DungeonTypeOptions", "mine");
-            bool desecratedTempleDungs = settings.GetBool("DungeonTypeOptions", "desecratedTemple");
-            bool prisonDungs = settings.GetBool("DungeonTypeOptions", "prison");
-            bool humanStrongholdDungs = settings.GetBool("DungeonTypeOptions", "humanStronghold");
-            bool orcStrongholdDungs = settings.GetBool("DungeonTypeOptions", "orcStronghold");
-            bool cryptDungs = settings.GetBool("DungeonTypeOptions", "crypt");
-
-            // Starting Date Options
-            bool randomStartDate = settings.GetBool("StartDateOptions", "randomStartingDate");
-            bool winter = settings.GetBool("StartDateOptions", "winterMonths");
-            bool spring = settings.GetBool("StartDateOptions", "springMonths");
-            bool summer = settings.GetBool("StartDateOptions", "summerMonths");
-            bool fall = settings.GetBool("StartDateOptions", "fallMonths");
-
-            // Misc Options
-            int safeZoneSize = settings.GetInt("MiscOptions", "safeZone");
-
-            InitMod(questDungeons, isolatedIslandDungeons, populatedIslandDungeons,
-                oceanDungs, desertDungs, hotDesertDungs, mountainDungs, rainforestDungs, swampDungs, mountainWoodsDungs, woodlandsDungs, hauntedWoodlandsDungs,
-                cemeteryDungs, scorpionNestDungs, volcanicCavesDungs, barbarianStrongholdDungs, dragonsDenDungs, giantStrongholdDungs, spiderNestDungs,
-                ruinedCastleDungs, harpyNestDungs, laboratoryDungs, vampireHauntDungs, covenDungs, naturalCaveDungs, mineDungs, desecratedTempleDungs,
-                prisonDungs, humanStrongholdDungs, orcStrongholdDungs, cryptDungs, randomStartDate, winter, spring, summer, fall, safeZoneSize);
+            mod.LoadSettingsCallback = LoadSettings; // To enable use of the "live settings changes" feature in-game.
 
             mod.IsReady = true;
         }
-		
-		private void Start()
+
+        private void Start()
         {
-            RandomStartingDungeonConsoleCommands.RegisterCommands();
-        }
-		
-		#region InitMod and Settings
-		
-		private static void InitMod(bool questDungeons, bool isolatedIslandDungeons, bool populatedIslandDungeons,
-            bool oceanDungs, bool desertDungs, bool hotDesertDungs, bool mountainDungs, bool rainforestDungs, bool swampDungs, bool mountainWoodsDungs,
-            bool woodlandsDungs, bool hauntedWoodlandsDungs, bool cemeteryDungs, bool scorpionNestDungs, bool volcanicCavesDungs, bool barbarianStrongholdDungs,
-            bool dragonsDenDungs, bool giantStrongholdDungs, bool spiderNestDungs, bool ruinedCastleDungs, bool harpyNestDungs, bool laboratoryDungs,
-            bool vampireHauntDungs, bool covenDungs, bool naturalCaveDungs, bool mineDungs, bool desecratedTempleDungs, bool prisonDungs,
-            bool humanStrongholdDungs, bool orcStrongholdDungs, bool cryptDungs, bool randomStartDate, bool winter, bool spring, bool summer, bool fall, int safeZoneSize)
-        {
-            Debug.Log("Begin mod init: RandomStartingDungeon");
+            Debug.Log("Begin mod init: Random Starting Dungeon");
 
-            // Region Specific and Quest Dungeon Options
-            if (questDungeons)
-            {
-                Debug.Log("RandomStartingDungeon: Quest Dungeons Are Allowed To Be Spawned In");
-                questDungStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Quest Dungeons Are Not Allowed To Be Spawned In");
-                questDungStartCheck = false;
-            }
+            Instance = this;
 
-            if (isolatedIslandDungeons)
-            {
-                Debug.Log("RandomStartingDungeon: Isolated Island Dungeons Are Allowed To Be Spawned In");
-                isolatedIslandStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Isolated Island Dungeons Are Not Allowed To Be Spawned In");
-                isolatedIslandStartCheck = false;
-            }
-
-            if (populatedIslandDungeons)
-            {
-                Debug.Log("RandomStartingDungeon: Populated Island Dungeons Are Allowed To Be Spawned In");
-                populatedIslandStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Populated Island Dungeons Are Not Allowed To Be Spawned In");
-                populatedIslandStartCheck = false;
-            }
-
-
-            // Dungeon Location Climate Options
-            if (oceanDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Ocean Climates Can Be Spawned In");
-                oceanStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Ocean Climates Can Not Be Spawned In");
-                oceanStartCheck = false;
-            }
-
-            if (desertDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Desert Climates Can Be Spawned In");
-                desertStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Desert Climates Can Not Be Spawned In");
-                desertStartCheck = false;
-            }
-
-            if (hotDesertDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Hot Desert Climates Can Be Spawned In");
-                desertHotStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Hot Desert Climates Can Not Be Spawned In");
-                desertHotStartCheck = false;
-            }
-
-            if (mountainDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Mountain Climates Can Be Spawned In");
-                mountainStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Mountain Climates Can Not Be Spawned In");
-                mountainStartCheck = false;
-            }
-
-            if (rainforestDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Rainforest Climates Can Be Spawned In");
-                rainforestStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Rainforest Climates Can Not Be Spawned In");
-                rainforestStartCheck = false;
-            }
-
-            if (swampDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Swamp Climates Can Be Spawned In");
-                swampStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Swamp Climates Can Not Be Spawned In");
-                swampStartCheck = false;
-            }
-
-            if (mountainWoodsDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Mountain Woods Climates Can Be Spawned In");
-                mountainWoodsStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Mountain Woods Climates Can Not Be Spawned In");
-                mountainWoodsStartCheck = false;
-            }
-
-            if (woodlandsDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Woodlands Climates Can Be Spawned In");
-                woodlandsStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Woodlands Climates Can Not Be Spawned In");
-                woodlandsStartCheck = false;
-            }
-
-            if (hauntedWoodlandsDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Haunted Woodlands Climates Can Be Spawned In");
-                hauntedWoodlandsStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dungeons Located Inside Haunted Woodlands Climates Can Not Be Spawned In");
-                hauntedWoodlandsStartCheck = false;
-            }
-
-
-            // Dungeon Type Options
-            if (cemeteryDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Cemetery Dungeon Types Can Be Spawned In");
-                cemeteryStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Cemetery Dungeon Types Can Not Be Spawned In");
-                cemeteryStartCheck = false;
-            }
-
-            if (scorpionNestDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Scorpion Nest Dungeon Types Can Be Spawned In");
-                scorpionNestStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Scorpion Nest Dungeon Types Can Not Be Spawned In");
-                scorpionNestStartCheck = false;
-            }
-
-            if (volcanicCavesDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Volcanic Caves Dungeon Types Can Be Spawned In");
-                volcanicCavesStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Volcanic Caves Dungeon Types Can Not Be Spawned In");
-                volcanicCavesStartCheck = false;
-            }
-
-            if (barbarianStrongholdDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Barbarian Stronghold Dungeon Types Can Be Spawned In");
-                barbarianStrongholdStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Barbarian Stronghold Dungeon Types Can Not Be Spawned In");
-                barbarianStrongholdStartCheck = false;
-            }
-
-            if (dragonsDenDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Dragons Den Dungeon Types Can Be Spawned In");
-                dragonsDenStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Dragons Den Dungeon Types Can Not Be Spawned In");
-                dragonsDenStartCheck = false;
-            }
-
-            if (giantStrongholdDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Giant Stronghold Dungeon Types Can Be Spawned In");
-                giantStrongholdStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Giant Stronghold Dungeon Types Can Not Be Spawned In");
-                giantStrongholdStartCheck = false;
-            }
-
-            if (spiderNestDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Spider Nest Dungeon Types Can Be Spawned In");
-                spiderNestStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Spider Nest Dungeon Types Can Not Be Spawned In");
-                spiderNestStartCheck = false;
-            }
-
-            if (ruinedCastleDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Ruined Castle Dungeon Types Can Be Spawned In");
-                ruinedCastleStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Ruined Castle Dungeon Types Can Not Be Spawned In");
-                ruinedCastleStartCheck = false;
-            }
-
-            if (harpyNestDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Harpy Nest Dungeon Types Can Be Spawned In");
-                harpyNestStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Harpy Nest Dungeon Types Can Not Be Spawned In");
-                harpyNestStartCheck = false;
-            }
-
-            if (laboratoryDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Laboratory Dungeon Types Can Be Spawned In");
-                laboratoryStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Laboratory Dungeon Types Can Not Be Spawned In");
-                laboratoryStartCheck = false;
-            }
-
-            if (vampireHauntDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Vampire Haunt Dungeon Types Can Be Spawned In");
-                vampireHauntStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Vampire Haunt Dungeon Types Can Not Be Spawned In");
-                vampireHauntStartCheck = false;
-            }
-
-            if (covenDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Coven Dungeon Types Can Be Spawned In");
-                covenStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Coven Dungeon Types Can Not Be Spawned In");
-                covenStartCheck = false;
-            }
-
-            if (naturalCaveDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Natural Cave Dungeon Types Can Be Spawned In");
-                naturalCaveStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Natural Cave Dungeon Types Can Not Be Spawned In");
-                naturalCaveStartCheck = false;
-            }
-
-            if (mineDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Mine Dungeon Types Can Be Spawned In");
-                mineStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Mine Dungeon Types Can Not Be Spawned In");
-                mineStartCheck = false;
-            }
-
-            if (desecratedTempleDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Desecrated Temple Dungeon Types Can Be Spawned In");
-                desecratedTempleStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Desecrated Temple Dungeon Types Can Not Be Spawned In");
-                desecratedTempleStartCheck = false;
-            }
-
-            if (prisonDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Prison Dungeon Types Can Be Spawned In");
-                prisonStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Prison Dungeon Types Can Not Be Spawned In");
-                prisonStartCheck = false;
-            }
-
-            if (humanStrongholdDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Human Stronghold Dungeon Types Can Be Spawned In");
-                humanStrongholdStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Human Stronghold Dungeon Types Can Not Be Spawned In");
-                humanStrongholdStartCheck = false;
-            }
-
-            if (orcStrongholdDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Orc Stronghold Dungeon Types Can Be Spawned In");
-                orcStrongholdStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Orc Stronghold Dungeon Types Can Not Be Spawned In");
-                orcStrongholdStartCheck = false;
-            }
-
-            if (cryptDungs)
-            {
-                Debug.Log("RandomStartingDungeon: Crypt Dungeon Types Can Be Spawned In");
-                cryptStartCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Crypt Dungeon Types Can Not Be Spawned In");
-                cryptStartCheck = false;
-            }
-
-            // Start Date Options
-            if (randomStartDate)
-            {
-                Debug.Log("RandomStartingDungeon: You Will Be Given A Random Starting Date Upon Creating A New Character");
-                randomStartDateCheck = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: You Will Not Be Given A Random Starting Date Upon Creating A New Character");
-                randomStartDateCheck = false;
-            }
-
-            if (winter)
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Winter Months");
-                Winter = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Winter Months");
-                Winter = false;
-            }
-
-            if (spring)
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Spring Months");
-                Spring = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Spring Months");
-                Spring = false;
-            }
-
-            if (summer)
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Summer Months");
-                Summer = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Summer Months");
-                Summer = false;
-            }
-
-            if (fall)
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Be During Fall Months");
-                Fall = true;
-            }
-            else
-            {
-                Debug.Log("RandomStartingDungeon: Your Random Start Date Can Not Be During Fall Months");
-                Fall = false;
-            }
-
-            safeZoneSizeSetting = safeZoneSize;
-
-            alreadyRolled = false;
+            mod.LoadSettings();
 
             StartGameBehaviour.OnStartGame += RandomizeSpawn_OnStartGame;
 
-            Debug.Log("Finished mod init: RandomStartingDungeon");
-		}
+            RegisterRandomStartingDungeonCommands();
 
-        #endregion
+            Debug.Log("Finished mod init: Random Starting Dungeon");
+        }
+
+        private static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
+        {
+            // Region Specific and Quest Dungeon Options
+            QuestDungStartCheck = mod.GetSettings().GetValue<bool>("Quest&IslandOptions", "QuestDungeons");
+            IsolatedIslandStartCheck = mod.GetSettings().GetValue<bool>("Quest&IslandOptions", "IsolatedIslandDungeons");
+            PopulatedIslandStartCheck = mod.GetSettings().GetValue<bool>("Quest&IslandOptions", "PopulatedIslandDungeons");
+
+            // Dungeon Location Climate Options
+            OceanStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Ocean");
+            DesertStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Desert");
+            DesertHotStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "HotDesert");
+            MountainStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Mountain");
+            RainforestStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Rainforest");
+            SwampStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Swamp");
+            SubtropicalStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Subtropical");
+            MountainWoodsStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "MountainWoods");
+            WoodlandsStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "Woodlands");
+            HauntedWoodlandsStartCheck = mod.GetSettings().GetValue<bool>("ClimateOptions", "HauntedWoodlands");
+
+            // Dungeon Type Options
+            ScorpionNestStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "ScorpionNest");
+            VolcanicCavesStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "VolcanicCaves");
+            BarbarianStrongholdStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "BarbarianStronghold");
+            DragonsDenStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "DragonsDen");
+            GiantStrongholdStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "GiantStronghold");
+            SpiderNestStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "SpiderNest");
+            RuinedCastleStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "RuinedCastle");
+            HarpyNestStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "HarpyNest");
+            LaboratoryStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Laboratory");
+            VampireHauntStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "VampireHaunt");
+            CovenStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Coven");
+            NaturalCaveStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "NaturalCave");
+            MineStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Mine");
+            DesecratedTempleStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "DesecratedTemple");
+            PrisonStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Prison");
+            HumanStrongholdStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "HumanStronghold");
+            OrcStrongholdStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "OrcStronghold");
+            CryptStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Crypt");
+            CemeteryStartCheck = mod.GetSettings().GetValue<bool>("DungeonTypeOptions", "Cemetery");
+
+            // Starting Date Options
+            RandomStartDateCheck = mod.GetSettings().GetValue<bool>("StartDateOptions", "RandomStartingDate");
+            Winter = mod.GetSettings().GetValue<bool>("StartDateOptions", "WinterMonths");
+            Spring = mod.GetSettings().GetValue<bool>("StartDateOptions", "SpringMonths");
+            Summer = mod.GetSettings().GetValue<bool>("StartDateOptions", "SummerMonths");
+            Fall = mod.GetSettings().GetValue<bool>("StartDateOptions", "FallMonths");
+
+            // Misc Options
+            SafeZoneSizeSetting = mod.GetSettings().GetValue<int>("MiscOptions", "SafeZone");
+
+            AlreadyRolled = false;
+        }
+
+        public static void RegisterRandomStartingDungeonCommands()
+        {
+            Debug.Log("[RandomStartingDungeon] Trying to register console commands.");
+            try
+            {
+                ConsoleCommandsDatabase.RegisterCommand(ManualRandomTeleport.name, ManualRandomTeleport.description, ManualRandomTeleport.usage, ManualRandomTeleport.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(TransformDungPos.name, TransformDungPos.description, TransformDungPos.usage, TransformDungPos.Execute);
+                ConsoleCommandsDatabase.RegisterCommand(CurrentBlockInfo.name, CurrentBlockInfo.description, CurrentBlockInfo.usage, CurrentBlockInfo.Execute);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(string.Format("Error Registering RandomStartingDungeon Console commands: {0}", e.Message));
+            }
+        }
+
+        private static class ManualRandomTeleport
+        {
+            public static readonly string name = "manual_random_teleport";
+            public static readonly string description = "Randomly Teleport To Dungeon Based On Current Sessions Options";
+            public static readonly string usage = "Randomly Teleport To Dungeon";
+
+            public static string Execute(params string[] args)
+            {
+                PickRandomDungeonTeleport();
+
+                return "Teleporting To Random Dungeon Now...";
+            }
+        }
+
+        private static class TransformDungPos
+        {
+            public static readonly string name = "transform_dung_pos";
+            public static readonly string description = "Randomly Transform Position Of Player Inside Dungeon";
+            public static readonly string usage = "Randomly Transform Player Position In Dungeon";
+
+            public static string Execute(params string[] args)
+            {
+                bool successCheck = TransformPlayerPosition();
+
+                if (successCheck)
+                    return "Transforming Player Dungeon Position...";
+                else
+                    return "Transformation Failed, Could Not Find Valid Dungeon Position.";
+            }
+        }
+
+        private static class CurrentBlockInfo
+        {
+            public static readonly string name = "current_block_info";
+            public static readonly string description = "Display The Block Info Of Block Player Is Currently Standing In";
+            public static readonly string usage = "Display The Current Block Info";
+
+            public static string Execute(params string[] args)
+            {
+                FindCurrentBlockInfo();
+
+                return "Current Block Info Displayed...";
+            }
+        }
 
         #region Methods and Functions
 
@@ -607,7 +248,7 @@ namespace RandomStartingDungeon
             randomStartConfirmBox.OnButtonClick += ConfirmRandomStart_OnButtonClick;
             DaggerfallUI.UIManager.PushWindow(randomStartConfirmBox);
 
-            if (randomStartDateCheck) // If option is enabled at all.
+            if (RandomStartDateCheck) // If option is enabled at all.
             {
                 int time = 0;
                 if (!Winter && !Spring && !Summer && !Fall) {} // Do Nothing                                                                                                                                          0000
@@ -654,7 +295,7 @@ namespace RandomStartingDungeon
             Dictionary<int, int[]> regionValidDungGrabBag = new Dictionary<int, int[]>();
 			regionValidDungGrabBag.Clear(); // Attempts to clear dictionary to keep from compile errors about duplicate keys.
 
-            if (!alreadyRolled)
+            if (!AlreadyRolled)
             {
                 for (int n = 0; n < 62; n++)
                 {
@@ -663,7 +304,7 @@ namespace RandomStartingDungeon
                         continue;
                     if (n == 31) // Index for "High Rock sea coast" or the "region" that holds the location of the two player boats, as well as the Mantellan Crux story dungeon.
                         continue;
-                    if (!isolatedIslandStartCheck && n == 61) // Index for "Cybiades" the isolated region that has only one single location on the whole island, that being a dungeon.
+                    if (!IsolatedIslandStartCheck && n == 61) // Index for "Cybiades" the isolated region that has only one single location on the whole island, that being a dungeon.
                         continue;
                     // Get indices for all dungeons of this type
                     foundIndices = CollectDungeonIndicesOfType(regionInfo, n);
@@ -672,13 +313,13 @@ namespace RandomStartingDungeon
 
                     regionValidDungGrabBag.Add(n, foundIndices);
                     validRegionIndexes.Add(n);
-                    alreadyRolled = true; // Too keep this code-block from reprocessing every-time this function is ran again in the same play session.
-                    quickRerollDictionary = regionValidDungGrabBag;
-                    quickRerollValidRegions = validRegionIndexes;
+                    AlreadyRolled = true; // Too keep this code-block from reprocessing every-time this function is ran again in the same play session.
+                    QuickRerollDictionary = regionValidDungGrabBag;
+                    QuickRerollValidRegions = validRegionIndexes;
                 }
             }
 
-            if (!alreadyRolled)
+            if (!AlreadyRolled)
             {
                 if (validRegionIndexes.Count > 0)
                 {
@@ -709,15 +350,15 @@ namespace RandomStartingDungeon
             }
             else
             {
-                if (quickRerollValidRegions.Count > 0)
+                if (QuickRerollValidRegions.Count > 0)
                 {
-                    int randomRegionIndex = RandomRegionRoller(quickRerollValidRegions.ToArray());
-                    foundIndices = quickRerollDictionary[randomRegionIndex];
+                    int randomRegionIndex = RandomRegionRoller(QuickRerollValidRegions.ToArray());
+                    foundIndices = QuickRerollDictionary[randomRegionIndex];
 
                     // Select a random dungeon location index from available list then get its location data
                     int RandDungIndex = UnityEngine.Random.Range(0, foundIndices.Length);
                     DFLocation dungLocation = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(randomRegionIndex, foundIndices[RandDungIndex]);
-                    dungLocationGlobal = dungLocation;
+                    DungLocationGlobal = dungLocation;
 
                     SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
                     if (SpawnLocations != null)
@@ -727,7 +368,7 @@ namespace RandomStartingDungeon
                         spawnPoint.flatPosition = SpawnLocations[RandSpawnIndex].flatPosition;
                         spawnPoint.dungeonX = SpawnLocations[RandSpawnIndex].dungeonX;
                         spawnPoint.dungeonZ = SpawnLocations[RandSpawnIndex].dungeonZ;
-                        spawnPointGlobal = spawnPoint;
+                        SpawnPointGlobal = spawnPoint;
                     }
                     else
                         Debug.Log("Transformation Failed, Could Not Find Valid Dungeon Position.");
@@ -757,7 +398,7 @@ namespace RandomStartingDungeon
 
         public static void TeleToSpawnPoint_OnRespawnerComplete()
         {
-            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon && alreadyRolled) // This will defintiely have to be changed, for logic with more discrimination on when it runs.
+            if (GameManager.Instance.PlayerEnterExit.IsPlayerInsideDungeon && AlreadyRolled) // This will defintiely have to be changed, for logic with more discrimination on when it runs.
             {
                 bool successCheck = TransformPlayerPosition();
 
@@ -776,7 +417,7 @@ namespace RandomStartingDungeon
                         DaggerfallEntityBehaviour entityBehaviour = entityBehaviours[i];
                         if (entityBehaviour.EntityType == EntityTypes.EnemyMonster || entityBehaviour.EntityType == EntityTypes.EnemyClass)
                         {
-                            if (Vector3.Distance(entityBehaviour.transform.position, GameManager.Instance.PlayerController.transform.position) <= safeZoneSizeSetting)
+                            if (Vector3.Distance(entityBehaviour.transform.position, GameManager.Instance.PlayerController.transform.position) <= SafeZoneSizeSetting)
                             {
                                 // Is it hostile or pacified?
                                 EnemySenses enemySenses = entityBehaviour.GetComponent<EnemySenses>();
@@ -794,7 +435,7 @@ namespace RandomStartingDungeon
 
         public static bool TransformPlayerPosition()
         {
-            DFLocation dungLocation = dungLocationGlobal;
+            DFLocation dungLocation = DungLocationGlobal;
             SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
             if (SpawnLocations != null)
             {
@@ -941,43 +582,43 @@ namespace RandomStartingDungeon
                 switch (dungLocation.Climate.WorldClimate)
                 {
                     case (int)MapsFile.Climates.Ocean:
-                        if (!oceanStartCheck)
+                        if (!OceanStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Desert:
-                        if (!desertStartCheck)
+                        if (!DesertStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Desert2:
-                        if (!desertHotStartCheck)
+                        if (!DesertHotStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Mountain:
-                        if (!mountainStartCheck)
+                        if (!MountainStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Rainforest:
-                        if (!rainforestStartCheck)
+                        if (!RainforestStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Swamp:
-                        if (!swampStartCheck)
+                        if (!SwampStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Subtropical:
-                        if (!subtropicalStartCheck)
+                        if (!SubtropicalStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.MountainWoods:
-                        if (!mountainWoodsStartCheck)
+                        if (!MountainWoodsStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.Woodlands:
-                        if (!woodlandsStartCheck)
+                        if (!WoodlandsStartCheck)
                             continue;
                         break;
                     case (int)MapsFile.Climates.HauntedWoodlands:
-                        if (!hauntedWoodlandsStartCheck)
+                        if (!HauntedWoodlandsStartCheck)
                             continue;
                         break;
                     default:
@@ -985,13 +626,13 @@ namespace RandomStartingDungeon
                 }
 
                 // Discard Main-quest Dungeons if the setting has these disabled, they are disabled by default
-                if (!questDungStartCheck && MainQuestDungeonChecker(regionIndex, dungLocation.Name))
+                if (!QuestDungStartCheck && MainQuestDungeonChecker(regionIndex, dungLocation.Name))
                     continue;
                 // Discard Isolated Island Dungeons With No Local Towns/Homes if the setting has these disabled, they are enabled by default
-                if (!isolatedIslandStartCheck && IsolatedIslandChecker(regionIndex, dungLocation.Name))
+                if (!IsolatedIslandStartCheck && IsolatedIslandChecker(regionIndex, dungLocation.Name))
                     continue;
                 // Discard Populated Island Dungeons With Local Towns/Homes if the setting has these disabled, they are enabled by default
-                if (!populatedIslandStartCheck && PopulatedIslandChecker(regionIndex, dungLocation.Name))
+                if (!PopulatedIslandStartCheck && PopulatedIslandChecker(regionIndex, dungLocation.Name))
                     continue;
 
                 foundLocationIndices.Add(i);
@@ -1020,80 +661,80 @@ namespace RandomStartingDungeon
             // Will exclude Cemetery type dungeons by default, the ones that are revealed by default and very small interior size.
             switch(dungeonType)
             {
-                case DFRegion.DungeonTypes.Cemetery:
-                    if (!cemeteryStartCheck)
-                        return true;
-                    break;
                 case DFRegion.DungeonTypes.ScorpionNest:
-                    if (!scorpionNestStartCheck)
+                    if (!ScorpionNestStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.VolcanicCaves:
-                    if (!volcanicCavesStartCheck)
+                    if (!VolcanicCavesStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.BarbarianStronghold:
-                    if (!barbarianStrongholdStartCheck)
+                    if (!BarbarianStrongholdStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.DragonsDen:
-                    if (!dragonsDenStartCheck)
+                    if (!DragonsDenStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.GiantStronghold:
-                    if (!giantStrongholdStartCheck)
+                    if (!GiantStrongholdStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.SpiderNest:
-                    if (!spiderNestStartCheck)
+                    if (!SpiderNestStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.RuinedCastle:
-                    if (!ruinedCastleStartCheck)
+                    if (!RuinedCastleStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.HarpyNest:
-                    if (!harpyNestStartCheck)
+                    if (!HarpyNestStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.Laboratory:
-                    if (!laboratoryStartCheck)
+                    if (!LaboratoryStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.VampireHaunt:
-                    if (!vampireHauntStartCheck)
+                    if (!VampireHauntStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.Coven:
-                    if (!covenStartCheck)
+                    if (!CovenStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.NaturalCave:
-                    if (!naturalCaveStartCheck)
+                    if (!NaturalCaveStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.Mine:
-                    if (!mineStartCheck)
+                    if (!MineStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.DesecratedTemple:
-                    if (!desecratedTempleStartCheck)
+                    if (!DesecratedTempleStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.Prison:
-                    if (!prisonStartCheck)
+                    if (!PrisonStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.HumanStronghold:
-                    if (!humanStrongholdStartCheck)
+                    if (!HumanStrongholdStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.OrcStronghold:
-                    if (!orcStrongholdStartCheck)
+                    if (!OrcStrongholdStartCheck)
                         return true;
                     break;
                 case DFRegion.DungeonTypes.Crypt:
-                    if (!cryptStartCheck)
+                    if (!CryptStartCheck)
+                        return true;
+                    break;
+                case DFRegion.DungeonTypes.Cemetery:
+                    if (!CemeteryStartCheck)
                         return true;
                     break;
                 default:
