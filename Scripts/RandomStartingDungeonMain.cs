@@ -3,8 +3,8 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    8/12/2020, 5:05 PM
-// Last Edit:		4/29/2023, 9:50 AM
-// Version:			1.12
+// Last Edit:		9/25/2023, 2:30 AM
+// Version:			1.13
 // Special Thanks:  Jehuty, TheLacus, Hazelnut
 // Modifier:
 
@@ -79,6 +79,7 @@ namespace RandomStartingDungeon
 
         // Misc Options
         public static int SafeZoneSizeSetting { get; set; }
+        public static bool NewerVersionWorkaroundToggle { get; set; }
 
         // General "Global" Variables
         public static bool AlreadyRolled { get; set; }
@@ -166,6 +167,7 @@ namespace RandomStartingDungeon
 
             // Misc Options
             SafeZoneSizeSetting = mod.GetSettings().GetValue<int>("MiscOptions", "SafeZone");
+            NewerVersionWorkaroundToggle = mod.GetSettings().GetValue<bool>("MiscOptions", "NewerVersionWorkaroundToggle");
 
             AlreadyRolled = false;
         }
@@ -234,6 +236,12 @@ namespace RandomStartingDungeon
 
         public static void RandomizeSpawn_OnStartGame(object sender, EventArgs e)
         {
+            PlayerEnterExit playerEnterExit = GameManager.Instance.PlayerEnterExit;
+            if (NewerVersionWorkaroundToggle && playerEnterExit != null && playerEnterExit.IsPlayerInsideDungeon)
+            {
+                playerEnterExit.TransitionDungeonExterior();
+            }
+
             TextFile.Token[] tokens = DaggerfallUnity.Instance.TextProvider.CreateTokens(
                         TextFile.Formatting.JustifyCenter,
                         "Do you want to be sent to a random dungeon?",
@@ -435,6 +443,7 @@ namespace RandomStartingDungeon
 
         public static bool TransformPlayerPosition()
         {
+            PlayerEnterExit.OnRespawnerComplete -= TeleToSpawnPoint_OnRespawnerComplete;
             DFLocation dungLocation = DungLocationGlobal;
             SpawnPoints[] SpawnLocations = RandomBlockLocationPicker(dungLocation);
             if (SpawnLocations != null)

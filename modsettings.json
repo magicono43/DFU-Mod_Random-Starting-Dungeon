@@ -305,6 +305,13 @@
                     "Description": "Default = 30 || Changes Size Of Safe Zone Cleared Of Enemies Upon Spawning. 0 = Disabled, 200 = Huge",
                     "$version": "v1",
                     "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Value": true,
+                    "Name": "NewerVersionWorkaroundToggle",
+                    "Description": "While Using DFU Versions Above v0.15.2, Allows Workaround To Prevent Being Dropped Into The Void Initially",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
                 }
             ],
             "$version": "v1"
